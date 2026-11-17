@@ -283,6 +283,7 @@ const zhDate=s=>{const d=parse(s);return d.getFullYear()+'年'+(d.getMonth()+1)+
 const dateL=s=>LANG==='zh'?zhDate(s):LANG==='dual'?longDate(s)+' · '+zhDate(s):longDate(s);
 let ZH={},ZHRX=[],ZHP={};
 ZH={
+'Masuk ke pesan Daftar Hadir.':'显示在出勤名单消息中。',
 'Karyawan shift':'倒班员工','Karyawan reguler':'常白班员工','KARYAWAN SHIFT':'倒班员工','KARYAWAN REGULER':'常白班员工','Reguler':'常白班','Masukkan sebagai:':'录入为：','Hari kerja':'工作日','Hari libur':'休息日',
 'Otomatis hadir di hari kerja. Ketuk OFF jika libur atau tidak masuk.':'工作日自动计为出勤。如休息或缺勤请点 OFF。','Karyawan reguler tidak masuk jadwal shift; kehadirannya diatur di Daftar Hadir.':'常白班员工不在排班表中，其出勤在“出勤名单”中设置。',
 'Hari kerja karyawan reguler (otomatis hadir):':'常白班工作日（自动计为出勤）：','Belum ada karyawan reguler. Pilih “Reguler” saat menambah karyawan, atau ubah jenis di daftar.':'还没有常白班员工。添加员工时选择“常白班”，或在列表中修改类型。',
@@ -789,13 +790,11 @@ function msg1(date){
     L.forEach(l=>{const e=emp(l.emp);lines.push(nmB(e)+(e.nik?' '+e.nik:'')+' ( '+jenisB(l.jenis)+' ');lines.push(dmyB(l.start)+' – '+dmyB(l.end)+' )')});
     if(L.length)lines.push('');
     if(sh.length){lines.push(labelB()+(b==='zh'?'：':' :'));sh.forEach(e=>lines.push(nmB(e)+(e.nik?' '+e.nik:'')+' ('+d.shift[e.id]+')'));lines.push('')}
-    if(nasi!=='')lines.push(b==='zh'?'午餐：'+nasi:H('Nasi siang','午餐')+' : '+nasi);
     return lines.join('\n').trim();
   }
   lines.push(...judulB(),'🗓️ *'+dateB(date)+'*',BAR,'');
   if(L.length){lines.push('🌴 *'+H('CUTI / IZIN','休假 / 请假')+'*');L.forEach(l=>{const e=emp(l.emp);lines.push('• '+nmB(e)+nikOf(e));lines.push('   ↳ '+jenisB(l.jenis)+' · '+dmyB(l.start)+' – '+dmyB(l.end))});lines.push('')}
   if(sh.length){lines.push('⏰ *'+labelB()+'*');sh.forEach(e=>{const c=d.shift[e.id];lines.push((isOff(c)?'😴 ':'✅ ')+nmB(e)+nikOf(e)+' — *'+c+'*')});lines.push('')}
-  if(nasi!=='')lines.push('🍱 *'+H('Nasi siang','午餐')+':* '+qtyB(nasi,'porsi','份'));
   return lines.join('\n').trim();
 }
 function msg2(date){
@@ -821,8 +820,9 @@ function msg3(date){
   const A=attendance(date);if(!A.total)return '';
   const pol=S.gaya==='polos',list=A.hadir.map(m=>m.e).concat(A.reg);
   const rows=list.map((e,i)=>(i+1)+'. '+nmB(e)+(pol?(e.nik?' '+e.nik:''):nikOf(e)));
-  if(pol)return [H('Daftar Hadir','出勤名单'),dateB(date),'',H('Hadir','出勤')+' : '+qtyB(A.total,'orang','人'),...rows].join('\n');
-  return ['👷 *'+H('DAFTAR HADIR','出勤名单')+'*','🗓️ *'+dateB(date)+'*',BAR,'','✅ *'+H('Hadir','出勤')+': '+qtyB(A.total,'orang','人')+'*',...rows].join('\n');
+  const nasi=String(D(date).nasi||'').trim();
+  if(pol)return [H('Daftar Hadir','出勤名单'),dateB(date),'',H('Hadir','出勤')+' : '+qtyB(A.total,'orang','人'),...rows].concat(nasi!==''?['',(BL()==='zh'?'午餐：'+nasi:H('Nasi siang','午餐')+' : '+nasi)]:[]).join('\n');
+  return ['👷 *'+H('DAFTAR HADIR','出勤名单')+'*','🗓️ *'+dateB(date)+'*',BAR,'','✅ *'+H('Hadir','出勤')+': '+qtyB(A.total,'orang','人')+'*',...rows].concat(nasi!==''?['','🍱 *'+H('Nasi siang','午餐')+':* '+qtyB(nasi,'porsi','份')]:[]).join('\n');
 }
 const autoPgl=n=>{const w=n.trim().split(/\s+/);const f=w.find(x=>!/^(muh|muhammad|moh|mohammad|mhd|m|md)\.?$/i.test(x));return (f||w[0]||'').replace(/[.,]/g,'').toLowerCase()};
 function parseBulk(txt){
@@ -891,9 +891,7 @@ function vPesan(){
    <h4>DRIVER</h4>${chips('driver',d.driver)}
    <datalist id="pgl">${act.map(e=>`<option value="${esc(e.pgl||e.nama)}">`).join('')}</datalist>
   </section>
-  <section class="card"><h3>Nasi siang</h3>
-   <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><input type="number" inputmode="numeric" min="0" style="width:96px" data-bind="nasi" value="${esc(d.nasi)}"><span class="mut sm">Saran: <b id="sug"></b> orang</span><button class="btn sm" data-act="usesug">Pakai</button></div>
-  </section>
+  ${nasiCard()}
   <section class="card"><div class="h"><h3>Pesan WhatsApp</h3><span class="badge" data-nt>${esc(dateL(date))}</span></div>
    <div class="g2" style="margin-bottom:12px">${langSel()}<label class="fld" style="margin:0">Gaya pesan<select data-bind="gaya"><option value="menarik" ${S.gaya!=='polos'?'selected':''}>✨ Menarik</option><option value="polos" ${S.gaya==='polos'?'selected':''}>Polos</option></select></label>${S.bahasa!=='zh'?`<label class="fld" style="margin:0">Judul pesan<input data-bind="judul" value="${esc(S.judul)}"></label>`:''}${S.bahasa!=='id'?`<label class="fld" style="margin:0">Judul pesan (中文)<input data-bind="judul_zh" value="${esc(S.judul_zh)}" lang="zh"></label>`:''}</div><div id="out"></div></section>`;
 }
@@ -910,6 +908,7 @@ function vMasuk(){
   <section class="card"><div class="h"><h3>Daftar hadir</h3><span class="badge go" data-nt>${esc(qtyL(A.total))}</span></div>
    ${rs?'<h4>KARYAWAN SHIFT</h4>'+rs:''}${rr?'<h4>KARYAWAN REGULER</h4>'+rr:''}
    ${A.total?'':'<p class="mut" style="margin:0">Belum ada yang hadir. Atur shift di menu Pesan WA atau Jadwal.</p><button class="btn pri" data-act="go" data-v="pesan" style="margin-top:10px">Atur shift</button>'}</section>
+  ${nasiCard()}
   ${regCard()}
   <section class="card"><h3>Tidak hadir</h3><h4>OFF</h4>${nl(A.off)}<h4>CUTI / IZIN</h4>${nl(A.cuti.map(l=>emp(l.emp)))}<h4>BELUM DIATUR</h4>${nl(A.belum)}</section>
   <section class="card"><div class="h"><h3>Pesan WhatsApp</h3></div><div style="margin-bottom:12px">${langSel()}</div><div id="out3"></div></section>`;
@@ -921,6 +920,9 @@ function refreshMasuk(){
   $('#quick').innerHTML=m?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(m)}">👷 Kirim Daftar Hadir</a>`:'';
   trDom(o);trDom($('#quick'));
 }
+function nasiCard(){const d=D(UI.date);return `<section class="card" id="sec-nasi"><h3>Nasi siang</h3><p class="mut sm" style="margin:4px 0 0">Masuk ke pesan Daftar Hadir.</p>
+   <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><input type="number" inputmode="numeric" min="0" style="width:96px" data-bind="nasi" value="${esc(d.nasi)}"><span class="mut sm">Saran: <b class="sug" data-nt>${suggest()}</b> orang</span><button class="btn sm" data-act="usesug">Pakai</button></div>
+  </section>`}
 function regCard(){
   const date=UI.date,onL=new Set(leavesOn(date).map(l=>l.emp)),R=S.emps.filter(e=>e.aktif&&isReg(e));if(!R.length)return '';
   return `<section class="card" id="sec-reg"><div class="h"><h3>Karyawan reguler</h3><span class="badge">${regWork(date)?'Hari kerja':'Hari libur'}</span></div><p class="mut sm" style="margin:0 0 4px">Otomatis hadir di hari kerja. Ketuk OFF jika libur atau tidak masuk.</p>
@@ -935,7 +937,7 @@ function bubble(title,text,id){
 function refreshOutput(){
   const o=$('#out');if(!o)return;
   o.innerHTML=bubble('PESAN 1 · JADWAL & SHIFT',msg1(UI.date),'m1')+bubble('PESAN 2 · PEMBAGIAN AREA',msg2(UI.date),'m2')+bubble('PESAN 3 · DAFTAR HADIR',msg3(UI.date),'m3')+`<button class="btn" data-act="copyall">Salin semua pesan</button>`;
-  const s=$('#sug');if(s)s.textContent=suggest();
+  document.querySelectorAll('.sug').forEach(x=>x.textContent=suggest());
   const a1=msg1(UI.date),a2=msg2(UI.date);
   $('#quick').innerHTML=(a1?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(a1)}">💬 Kirim Pesan 1</a>`:'')+(a2?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(a2)}">📍 Kirim Pesan 2</a>`:'');
   trDom(o);trDom($('#quick'));
@@ -1144,7 +1146,7 @@ document.addEventListener('input',ev=>{
   const t=ev.target,b=t.dataset.bind;if(!b)return;
   if(b==='kode'){W(UI.date).areas[+t.dataset.i].kode=t.value;save();refreshOutput()}
   else if(b==='label'){S.label=t.value;save();refreshOutput()}
-  else if(b==='nasi'){W(UI.date).nasi=t.value;save();refreshOutput()}
+  else if(b==='nasi'){W(UI.date).nasi=t.value;save();refreshOutput();refreshMasuk()}
   else if(b==='emp'){const e=emp(t.dataset.e),f=t.dataset.f;e[f]=t.value;if(f==='zh')e.zhAuto=false;if((f==='nama'||f==='pgl')&&e.zhAuto!==false){e.zh=zhOf(e);e.zhAuto=true;const z=document.querySelector(`input[data-e="${e.id}"][data-f="zh"]`);if(z){z.value=e.zh;z.placeholder=e.zh}}save()}
   else if(b==='label_zh'){S.label_zh=t.value;save();refreshOutput()}
   else if(b==='judul_zh'){S.judul_zh=t.value;save();refreshOutput()}
