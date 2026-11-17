@@ -7,6 +7,8 @@ Aplikasi web (satu file `index.html`) untuk mengatur karyawan dan membuat pesan 
 - **Cuti & Izin** – pengajuan dengan status Berlangsung / Akan datang / Selesai.
 - **Karyawan** – input daftar sekaligus (`Nama, NIK` per baris), urutan, tanggal lahir, kode shift.
 - **Ringkasan** – sebaran shift (donat) dan rekap bulanan.
+- **Daftar Hadir** – karyawan shift (kode selain OFF) dan karyawan reguler (otomatis hadir di hari kerja, bisa ditandai OFF), tanpa yang cuti. Pesan WA hanya berisi nomor, nama panggilan, dan NIK.
+- **Dwibahasa** – tampilan dan pesan WA bawaan Indonesia + 中文 berdampingan; nama Mandarin dibuat dari nama panggilan.
 - **Beranda** – menu, timeline pengumuman, cuti, dan ulang tahun.
 - **Penyimpanan** – server GitHub, status sinkron, dan cadangan data.
 

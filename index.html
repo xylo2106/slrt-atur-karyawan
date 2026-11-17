@@ -283,6 +283,10 @@ const zhDate=s=>{const d=parse(s);return d.getFullYear()+'年'+(d.getMonth()+1)+
 const dateL=s=>LANG==='zh'?zhDate(s):LANG==='dual'?longDate(s)+' · '+zhDate(s):longDate(s);
 let ZH={},ZHRX=[],ZHP={};
 ZH={
+'Karyawan shift':'倒班员工','Karyawan reguler':'常白班员工','KARYAWAN SHIFT':'倒班员工','KARYAWAN REGULER':'常白班员工','Reguler':'常白班','Masukkan sebagai:':'录入为：','Hari kerja':'工作日','Hari libur':'休息日',
+'Otomatis hadir di hari kerja. Ketuk OFF jika libur atau tidak masuk.':'工作日自动计为出勤。如休息或缺勤请点 OFF。','Karyawan reguler tidak masuk jadwal shift; kehadirannya diatur di Daftar Hadir.':'常白班员工不在排班表中，其出勤在“出勤名单”中设置。',
+'Hari kerja karyawan reguler (otomatis hadir):':'常白班工作日（自动计为出勤）：','Belum ada karyawan reguler. Pilih “Reguler” saat menambah karyawan, atau ubah jenis di daftar.':'还没有常白班员工。添加员工时选择“常白班”，或在列表中修改类型。',
+'Urutan di sini menentukan urutan di pesan WA. “Panggilan” dipakai di pesan WA, nama Mandarin, dan pembagian area.':'此处顺序即 WA 消息中的顺序。“昵称”用于 WA 消息、中文名和区域分配。',
 'Daftar Hadir':'出勤名单','Daftar hadir':'出勤名单','Hadir':'出勤','Tidak hadir':'未出勤','Daftar hadir ›':'出勤名单 ›','👷 Kirim Daftar Hadir':'👷 发送出勤名单','PESAN 3 · DAFTAR HADIR':'消息 3 · 出勤名单',
 'Belum ada yang hadir. Atur shift di menu Pesan WA atau Jadwal.':'还没有出勤人员。请在“WA 消息”或“排班”菜单中安排班次。','Indonesia + 中文':'Indonesia + 中文','Jadwal hari ini':'今日排班',
 '+ Tambah area':'+ 添加区域','+ kode':'+ 代码','+ nama':'+ 姓名','orang':'人','Area Kerja':'工作区域','BELUM DIATUR':'未安排','Bahasa':'语言','Bahasa pesan':'消息语言',
@@ -348,7 +352,7 @@ ZHRX=[
 [/^Jadwal hari ini$/,'今日排班']
 ];
 ZHP={
-bulkhelp:'输入或粘贴，<b>每行一名员工</b>。格式：<b>姓名, 工号</b>（工号可留空）。昵称和<b>中文名</b>会自动生成，也可以自己填写：<b>姓名, 工号, 昵称, 中文名</b>。',
+bulkhelp:'输入或粘贴，<b>每行一名员工</b>。格式：<b>姓名, 工号</b>（工号可留空）。昵称会自动生成，<b>中文名</b>根据昵称生成；也可以自己填写：<b>姓名, 工号, 昵称, 中文名</b>。',
 codehelp:'班次选项中显示的代码。代码 <b>OFF</b> 不计入出勤。',
 dbinfo:'当前是在 claude.ai 中打开本应用，数据会自动保存在 claude.ai 服务器。通过 <b>GitHub Pages</b> 或设备上的文件打开时才使用 GitHub 服务器。两种存储彼此独立，迁移数据请使用下方的<b>备份</b>。',
 connnote:'令牌只保存在本设备的浏览器中。其他设备需要用同一个令牌或新令牌连接一次。',
@@ -390,22 +394,27 @@ function trDom(root){
 }
 const ZHJENIS={'Cuti Tahunan':'年假','Cuti Sakit':'病假','Izin':'事假','Cuti Khusus':'特别假','Cuti Hamil':'产假','Cuti':'休假','Sakit':'病假'};
 const jenisL=j=>{const z=ZHJENIS[j];return LANG==='zh'?(z||j):LANG==='dual'&&z?j+' ('+z+')':j};
-const zhN=e=>e.zh||zhName(e.nama);
+const zhOf=e=>zhName(e.pgl||e.nama);
+const zhN=e=>e.zh||zhOf(e);
+const nickOf=e=>{const p=String(e.pgl||'').trim();return p?p.replace(/(^|[\s.\-])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):e.nama};
 const dn=e=>e?(LANG==='zh'?zhN(e)+' ('+e.nama+')':LANG==='dual'?e.nama+' '+zhN(e):e.nama):'';
 
 
 /* ---------- data ---------- */
 const KEY='atur-karyawan-v2';
 let storeOK=true;
-function empty(){return {nama:'Admin',emps:[],codes:['4','4HM','OFF'],label:'Shift pagi – malam',label_zh:'早班 – 夜班',judul:'LAPORAN HARIAN SHIFT',judul_zh:'每日排班报告',bahasa:'dual',bv2:1,gaya:'menarik',leaves:[],days:{},ann:[]}}
+function empty(){return {nama:'Admin',emps:[],codes:['4','4HM','OFF'],label:'Shift pagi – malam',label_zh:'早班 – 夜班',judul:'LAPORAN HARIAN SHIFT',judul_zh:'每日排班报告',bahasa:'dual',bv2:1,zhv2:1,regDays:[1,2,3,4,5,6],gaya:'menarik',leaves:[],days:{},ann:[]}}
 function load(){try{const r=localStorage.getItem(KEY);if(!r)return null;return norm(JSON.parse(r))}catch(e){return null}}
-function norm(o){if(!o||!Array.isArray(o.emps))return null;o.nama=o.nama||'Admin';o.codes=o.codes||['4','4HM','OFF'];o.label=o.label||'Shift pagi – malam';o.leaves=o.leaves||[];o.days=o.days||{};o.judul=o.judul||'LAPORAN HARIAN SHIFT';o.gaya=o.gaya||'menarik';o.ann=o.ann||[];o.label_zh=o.label_zh||'早班 – 夜班';o.judul_zh=o.judul_zh||'每日排班报告';if(!o.bv2){o.bahasa='dual';o.bv2=1}o.bahasa=['id','zh','dual'].includes(o.bahasa)?o.bahasa:'dual';o.emps.forEach(e=>{if(e.zh===undefined){e.zh=zhName(e.nama);e.zhAuto=true}});return o}
+function norm(o){if(!o||!Array.isArray(o.emps))return null;o.nama=o.nama||'Admin';o.codes=o.codes||['4','4HM','OFF'];o.label=o.label||'Shift pagi – malam';o.leaves=o.leaves||[];o.days=o.days||{};o.judul=o.judul||'LAPORAN HARIAN SHIFT';o.gaya=o.gaya||'menarik';o.ann=o.ann||[];o.label_zh=o.label_zh||'早班 – 夜班';o.judul_zh=o.judul_zh||'每日排班报告';if(!o.bv2){o.bahasa='dual';o.bv2=1}o.bahasa=['id','zh','dual'].includes(o.bahasa)?o.bahasa:'dual';o.regDays=Array.isArray(o.regDays)?o.regDays:[1,2,3,4,5,6];o.emps.forEach(e=>{if(e.tipe!=='reguler')e.tipe='shift';if(e.zh===undefined||(!o.zhv2&&e.zhAuto!==false)){e.zh=zhOf(e);e.zhAuto=true}});o.zhv2=1;return o}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(DIRTYKEY,'1')}catch(e){storeOK=false;warn()}localDirty=true;if(BACK!=='local'&&ready&&SYNC!=='err')setSync('saving');schedFlush()}
 try{localStorage.setItem('_t','1');localStorage.removeItem('_t');localStorage.removeItem('atur-karyawan-v1')}catch(e){storeOK=false}
 let S=load()||empty();
-const UI={tab:'home',date:ymd(new Date()),brush:'4',cf:null,focus:null};
+const isReg=e=>e&&e.tipe==='reguler';
+const regWork=date=>(S.regDays||[1,2,3,4,5,6]).includes(parse(date).getDay());
+const regState=(e,date)=>((D(date).reg||{})[e.id])||(regWork(date)?'H':'OFF');
+const UI={addTipe:'shift',tab:'home',date:ymd(new Date()),brush:'4',cf:null,focus:null};
 const emp=id=>S.emps.find(e=>e.id===id);
-const blank=()=>({shift:{},areas:[],piket:[],driver:[],nasi:''});
+const blank=()=>({shift:{},reg:{},areas:[],piket:[],driver:[],nasi:''});
 const D=date=>S.days[date]||blank();
 const W=date=>{if(!S.days[date])S.days[date]=blank();return S.days[date]};
 const leavesOn=date=>S.leaves.filter(l=>l.start<=date&&date<=l.end&&emp(l.emp)&&emp(l.emp).aktif).sort((a,b)=>S.emps.indexOf(emp(a.emp))-S.emps.indexOf(emp(b.emp)));
@@ -424,7 +433,7 @@ const SYNCMSG=()=>({load:'Memuat data dari '+where()+'…',ok:'Data tersimpan di
 let SYNCERR='';
 const st=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,x)=>(a[x]=v[x],a),{}):v);
 const mainBody=()=>{const m={};Object.keys(S).forEach(k=>{if(k!=='days')m[k]=S[k]});return m};
-const isBlank=d=>!Object.keys(d.shift||{}).length&&!(d.areas||[]).length&&!(d.piket||[]).length&&!(d.driver||[]).length&&!String(d.nasi||'').trim();
+const isBlank=d=>!Object.keys(d.shift||{}).length&&!Object.keys(d.reg||{}).length&&!(d.areas||[]).length&&!(d.piket||[]).length&&!(d.driver||[]).length&&!String(d.nasi||'').trim();
 const syncHTML=dot=>`<button class="sync s-${SYNC}${dot?' dot':''}" data-sync ${dot?'data-dot="1"':''} data-act="syncinfo" aria-label="Status penyimpanan"><i></i><b>${T(SYNCLBL[SYNC])}</b></button>`;
 function paintSync(){document.querySelectorAll('[data-sync]').forEach(el=>{el.className='sync s-'+SYNC+(el.dataset.dot?' dot':'');el.querySelector('b').textContent=T(SYNCLBL[SYNC])})}
 function setSync(x,msg){SYNC=x;SYNCERR=x==='err'?(msg||''):'';paintSync();const sv=$('#srvstat');if(sv)sv.textContent=T(SYNCMSG())}
@@ -753,7 +762,8 @@ const cap=s=>s.replace(/(^|[\s.\-])([a-z])/g,(m,a,b)=>a+b.toUpperCase());
 const BAR='━━━━━━━━━━━━━━━';
 const BL=()=>S.bahasa||'id';
 const H=(id,zh)=>{const b=BL();return b==='zh'?zh:b==='dual'?id+' · '+zh:id};
-const nmB=e=>{const b=BL();return b==='zh'?zhN(e)+' '+e.nama:b==='dual'?e.nama+' '+zhN(e):e.nama};
+const nmB=e=>{const b=BL(),n=nickOf(e);return b==='zh'?zhN(e)+' '+n:b==='dual'?n+' '+zhN(e):n};
+const nmS=e=>{const b=BL(),n=nickOf(e);return b==='zh'?zhN(e):b==='dual'?n+' '+zhN(e):n};
 const dateB=s2=>{const b=BL();return b==='zh'?zhDate(s2):b==='dual'?longDate(s2)+' · '+zhDate(s2):longDate(s2)};
 const jenisB=j=>{const b=BL(),z=ZHJENIS[j];return b==='zh'?(z||j):b==='dual'&&z?j+' ('+z+')':j};
 const dmyB=s2=>{const [y,m,d]=s2.split('-').map(Number);return BL()==='zh'?y+'/'+m+'/'+d:d+'/'+m+'/'+y};
@@ -763,14 +773,16 @@ function nickMap(){const m={};S.emps.forEach(e=>{const first=(e.nama||'').split(
 const taskL=t=>t==='Piket'?H('Piket','值班'):t==='Driver'?H('Driver','司机'):t;
 function nickB(n,nm){const e=(nm||nickMap())[String(n).toLowerCase().trim()],b=BL();if(b==='id')return cap(n);const z=e?zhN(e):zhName(cap(n));return b==='zh'?z:cap(n)+' '+z}
 function attendance(date){
-  const d=D(date),L=leavesOn(date),onL=new Set(L.map(l=>l.emp)),act=S.emps.filter(e=>e.aktif),hadir=[],off=[],belum=[];
-  act.forEach(e=>{if(onL.has(e.id))return;const c=d.shift[e.id]||'';if(!c)belum.push(e);else if(isOff(c))off.push(e);else hadir.push({e,c})});
-  return {hadir,off,cuti:L,belum,total:hadir.length};
+  const d=D(date),L=leavesOn(date),onL=new Set(L.map(l=>l.emp)),act=S.emps.filter(e=>e.aktif),hadir=[],reg=[],off=[],belum=[];
+  act.forEach(e=>{if(onL.has(e.id))return;
+    if(isReg(e)){if(regState(e,date)==='OFF')off.push(e);else reg.push(e);return}
+    const c=d.shift[e.id]||'';if(!c)belum.push(e);else if(isOff(c))off.push(e);else hadir.push({e,c})});
+  return {hadir,reg,off,cuti:L,belum,total:hadir.length+reg.length};
 }
 const qtyB=(n,id,zh)=>{const b=BL();return b==='zh'?n+' '+zh:b==='dual'?n+' '+id+' · '+n+' '+zh:n+' '+id};
 function msg1(date){
   const d=D(date),L=leavesOn(date),onL=new Set(L.map(l=>l.emp));
-  const sh=S.emps.filter(e=>e.aktif&&d.shift[e.id]&&!onL.has(e.id));
+  const sh=S.emps.filter(e=>e.aktif&&!isReg(e)&&d.shift[e.id]&&!onL.has(e.id));
   const nasi=String(d.nasi).trim(),lines=[],b=BL();
   if(S.gaya==='polos'){
     lines.push(dateB(date),'');
@@ -807,8 +819,8 @@ function msg2(date){
 }
 function msg3(date){
   const A=attendance(date);if(!A.total)return '';
-  const pol=S.gaya==='polos';
-  const rows=A.hadir.map((m,i)=>(i+1)+'. '+nmB(m.e)+(pol?(m.e.nik?' '+m.e.nik:'')+' ('+m.c+')':nikOf(m.e)+' — '+m.c));
+  const pol=S.gaya==='polos',list=A.hadir.map(m=>m.e).concat(A.reg);
+  const rows=list.map((e,i)=>(i+1)+'. '+nmB(e)+(pol?(e.nik?' '+e.nik:''):nikOf(e)));
   if(pol)return [H('Daftar Hadir','出勤名单'),dateB(date),'',H('Hadir','出勤')+' : '+qtyB(A.total,'orang','人'),...rows].join('\n');
   return ['👷 *'+H('DAFTAR HADIR','出勤名单')+'*','🗓️ *'+dateB(date)+'*',BAR,'','✅ *'+H('Hadir','出勤')+': '+qtyB(A.total,'orang','人')+'*',...rows].join('\n');
 }
@@ -869,8 +881,9 @@ function vPesan(){
   </section>
   <section class="card"><div class="h"><h3>Shift</h3><button class="btn sm" data-act="copyprev">Salin dari kemarin</button></div>
    <div class="${S.bahasa!=='id'?'g2':''}"><label class="fld">Judul bagian<input data-bind="label" value="${esc(S.label)}"></label>${S.bahasa!=='id'?`<label class="fld">Judul bagian (中文)<input data-bind="label_zh" value="${esc(S.label_zh)}" lang="zh"></label>`:''}</div>
-   ${act.filter(e=>!onL.has(e.id)).map(e=>{const cur=d.shift[e.id]||'';return `<div class="srow"><div><b data-nt>${esc(dn(e))}</b> <span class="mut sm">${esc(e.nik)}</span></div><div class="seg">${S.codes.concat(cur&&!S.codes.includes(cur)?[cur]:[]).map(c=>`<button class="sc ${cur===c?'on':''}" style="${cstyle(c)}" data-act="setshift" data-e="${e.id}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div></div>`}).join('')||'<p class="mut">Semua karyawan sedang cuti/izin.</p>'}
+   ${act.filter(e=>!onL.has(e.id)&&!isReg(e)).map(e=>{const cur=d.shift[e.id]||'';return `<div class="srow"><div><b data-nt>${esc(dn(e))}</b> <span class="mut sm">${esc(e.nik)}</span></div><div class="seg">${S.codes.concat(cur&&!S.codes.includes(cur)?[cur]:[]).map(c=>`<button class="sc ${cur===c?'on':''}" style="${cstyle(c)}" data-act="setshift" data-e="${e.id}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div></div>`}).join('')||'<p class="mut">Semua karyawan sedang cuti/izin.</p>'}
   </section>
+  ${regCard()}
   <section class="card" id="sec-area"><div class="h"><h3>Pembagian area kerja</h3></div>
    ${d.areas.map((a,i)=>`<div class="area"><div class="arow"><input class="kode" placeholder="Kode area" data-bind="kode" data-i="${i}" value="${esc(a.kode)}"><span class="grow"></span><button class="x" data-act="rmarea" data-i="${i}" aria-label="Hapus area">✕</button></div>${chips('area:'+i,a.names)}</div>`).join('')}
    <button class="btn" data-act="addarea">+ Tambah area</button>
@@ -888,12 +901,16 @@ function nickZh(n){const e=nickMap()[String(n).toLowerCase().trim()];return e?zh
 function langSel(){return `<label class="fld" style="margin:0">Bahasa pesan<select data-bind="bahasa"><option value="id" ${S.bahasa==='id'?'selected':''}>🇮🇩 Indonesia</option><option value="zh" ${S.bahasa==='zh'?'selected':''}>🇨🇳 中文</option><option value="dual" ${S.bahasa==='dual'?'selected':''}>🇮🇩+🇨🇳 Indonesia + 中文</option></select></label>`}
 function vMasuk(){
   if(!S.emps.length)return needEmp();
-  const A=attendance(UI.date);
-  const rows=A.hadir.map((m,i)=>`<div class="mrow"><span class="no">${i+1}</span><div class="grow"><b data-nt>${esc(m.e.nama)}</b> <span class="zhn" data-nt>${esc(zhN(m.e))}</span><div class="mut sm" data-nt>${esc(m.e.nik||'')}</div></div><span class="badge" style="${cstyle(m.c)}" data-nt>${esc(m.c)}</span></div>`).join('');
+  const A=attendance(UI.date);let no=0;
+  const row=(e,badge)=>`<div class="mrow"><span class="no">${++no}</span><div class="grow"><b data-nt>${esc(nickOf(e))}</b> <span class="zhn" data-nt>${esc(zhN(e))}</span><div class="mut sm" data-nt>${esc(e.nama)}${e.nik?' · '+esc(e.nik):''}</div></div>${badge}</div>`;
+  const rs=A.hadir.map(m=>row(m.e,`<span class="badge" style="${cstyle(m.c)}" data-nt>${esc(m.c)}</span>`)).join('');
+  const rr=A.reg.map(e=>row(e,'')).join('');
   const nl=a=>a.length?`<div class="nlist" data-nt>${a.map(e=>`<span>${esc(dn(e))}</span>`).join('')}</div>`:'<p class="mut sm" style="margin:0">Tidak ada.</p>';
   return `<div class="stats"><div class="stat"><b>${A.total}</b><span>Hadir</span></div><div class="stat"><b>${A.off.length}</b><span>OFF</span></div><div class="stat"><b>${A.cuti.length}</b><span>Cuti / izin</span></div><div class="stat"><b>${A.belum.length}</b><span>Belum diatur</span></div></div>
-  <section class="card"><div class="h"><h3>Daftar hadir</h3><span class="badge go" data-nt>${esc(qtyL(A.total))}</span></div>${rows||'<p class="mut" style="margin:0">Belum ada yang hadir. Atur shift di menu Pesan WA atau Jadwal.</p>'}
-   ${A.total?'':'<button class="btn pri" data-act="go" data-v="pesan" style="margin-top:10px">Atur shift</button>'}</section>
+  <section class="card"><div class="h"><h3>Daftar hadir</h3><span class="badge go" data-nt>${esc(qtyL(A.total))}</span></div>
+   ${rs?'<h4>KARYAWAN SHIFT</h4>'+rs:''}${rr?'<h4>KARYAWAN REGULER</h4>'+rr:''}
+   ${A.total?'':'<p class="mut" style="margin:0">Belum ada yang hadir. Atur shift di menu Pesan WA atau Jadwal.</p><button class="btn pri" data-act="go" data-v="pesan" style="margin-top:10px">Atur shift</button>'}</section>
+  ${regCard()}
   <section class="card"><h3>Tidak hadir</h3><h4>OFF</h4>${nl(A.off)}<h4>CUTI / IZIN</h4>${nl(A.cuti.map(l=>emp(l.emp)))}<h4>BELUM DIATUR</h4>${nl(A.belum)}</section>
   <section class="card"><div class="h"><h3>Pesan WhatsApp</h3></div><div style="margin-bottom:12px">${langSel()}</div><div id="out3"></div></section>`;
 }
@@ -904,6 +921,13 @@ function refreshMasuk(){
   $('#quick').innerHTML=m?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(m)}">👷 Kirim Daftar Hadir</a>`:'';
   trDom(o);trDom($('#quick'));
 }
+function regCard(){
+  const date=UI.date,onL=new Set(leavesOn(date).map(l=>l.emp)),R=S.emps.filter(e=>e.aktif&&isReg(e));if(!R.length)return '';
+  return `<section class="card" id="sec-reg"><div class="h"><h3>Karyawan reguler</h3><span class="badge">${regWork(date)?'Hari kerja':'Hari libur'}</span></div><p class="mut sm" style="margin:0 0 4px">Otomatis hadir di hari kerja. Ketuk OFF jika libur atau tidak masuk.</p>
+   ${R.map(e=>{const nm=`<div><b data-nt>${esc(dn(e))}</b> <span class="mut sm">${esc(e.nik)}</span></div>`;if(onL.has(e.id))return `<div class="srow">${nm}<div class="seg"><span class="badge">Cuti / izin</span></div></div>`;const st=regState(e,date);
+     return `<div class="srow">${nm}<div class="seg"><button class="sc ${st==='H'?'on':''}" style="${cstyle('4')}" data-act="setreg" data-e="${e.id}" data-v="H">Hadir</button><button class="sc ${st==='OFF'?'on':''}" style="${cstyle('OFF')}" data-act="setreg" data-e="${e.id}" data-v="OFF">OFF</button></div></div>`}).join('')}</section>`;
+}
+const tipeSeg=e=>['shift','reguler'].map(t=>`<button class="sc ${(e.tipe||'shift')===t?'on':''}" style="height:34px;min-width:0;padding:0 10px;font-size:12.5px;${cstyle(t==='shift'?'4':'4HM')}" data-act="settipe" data-e="${e.id}" data-v="${t}">${t==='shift'?'Shift':'Reguler'}</button>`).join('');
 function bubble(title,text,id){
   if(!text)return `<div class="bhead">${title}</div><div class="chat"><div class="bubble mut">(kosong)</div></div><div class="brow"></div>`;
   return `<div class="bhead">${title}</div><div class="chat"><div class="bubble">${esc(text)}</div></div><div class="brow"><button class="btn pri" data-act="copy" data-m="${id}">Salin</button><a class="btn wa" target="_blank" rel="noopener" href="${waLink(text)}">Kirim ke WhatsApp</a></div>`;
@@ -919,7 +943,7 @@ function refreshOutput(){
 function weekStart(s){const d=parse(s),g=d.getDay();return addDays(s,g===0?-6:1-g)}
 function vJadwal(){
   if(!S.emps.length)return needEmp();
-  const mon=weekStart(UI.date),days=[...Array(7)].map((_,i)=>addDays(mon,i)),act=S.emps.filter(e=>e.aktif);
+  const mon=weekStart(UI.date),days=[...Array(7)].map((_,i)=>addDays(mon,i)),act=S.emps.filter(e=>e.aktif&&!isReg(e)),nReg=S.emps.filter(e=>e.aktif&&isReg(e)).length;
   const pal=S.codes.map(c=>`<button class="pc ${UI.brush===c?'on':''}" style="${cstyle(c)}" data-act="brush" data-c="${esc(c)}">${esc(c)}</button>`).join('')+`<button class="pc ${UI.brush===''?'on':''}" data-act="brush" data-c="">Hapus</button>`;
   const rows=act.map(e=>{
     const tds=days.map(dt=>{
@@ -934,15 +958,23 @@ function vJadwal(){
   return `<section class="card"><div class="h"><h3>Minggu ini</h3><span class="badge">${fmtDMY(days[0])} – ${fmtDMY(days[6])}</span></div>
    <p class="mut sm" style="margin:0 0 10px">Pilih kode, lalu ketuk sel untuk mengisi. Ketuk lagi untuk menghapus. Sel bergaris = cuti/izin.</p>
    <div class="pal">${pal}</div>
-   <div class="tw"><table><thead><tr><th>Nama</th>${th}<th></th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+   <div class="tw"><table><thead><tr><th>Nama</th>${th}<th></th></tr></thead><tbody>${rows}</tbody></table></div>${nReg?'<p class="mut sm" style="margin:10px 0 0">Karyawan reguler tidak masuk jadwal shift; kehadirannya diatur di Daftar Hadir.</p>':''}</section>`;
 }
 function vEmp(){
-  const rows=S.emps.map((e,i)=>`<div class="erow"><input class="w" data-bind="emp" data-e="${e.id}" data-f="nama" value="${esc(e.nama)}" placeholder="Nama"><input data-bind="emp" data-e="${e.id}" data-f="pgl" value="${esc(e.pgl)}" placeholder="Panggilan"><input data-bind="emp" data-e="${e.id}" data-f="nik" value="${esc(e.nik)}" placeholder="NIK" inputmode="numeric"><label class="fld w" style="margin:0">Nama 中文<span class="tok"><input data-bind="emp" data-e="${e.id}" data-f="zh" value="${esc(e.zh||'')}" placeholder="${esc(zhName(e.nama))}" lang="zh" data-nt><button class="btn sm" data-act="zhauto" data-e="${e.id}" type="button">Otomatis</button></span></label><label class="fld w" style="margin:0">Tanggal lahir (opsional)<input type="date" data-bind="emp" data-e="${e.id}" data-f="lahir" value="${esc(e.lahir||'')}"></label><div class="eact"><div><button class="x" data-act="mv" data-e="${e.id}" data-n="-1" ${i===0?'disabled':''} aria-label="Naik">↑</button><button class="x" data-act="mv" data-e="${e.id}" data-n="1" ${i===S.emps.length-1?'disabled':''} aria-label="Turun">↓</button></div><label class="sm mut" style="display:flex;align-items:center;gap:6px"><input type="checkbox" data-bind="aktif" data-e="${e.id}" ${e.aktif?'checked':''} style="width:20px;height:20px"> aktif</label><button class="x" data-act="delemp" data-e="${e.id}" aria-label="Hapus">🗑</button></div></div>`).join('');
-  return `<section class="card" id="sec-bulk"><h3>📥 Input daftar karyawan</h3><p class="mut sm" style="margin:4px 0 8px" data-zhk="bulkhelp">Ketik atau tempel, <b>satu karyawan per baris</b>. Format: <b>Nama, NIK</b> (NIK boleh kosong). Panggilan dan <b>nama Mandarin</b> dibuat otomatis, atau tulis sendiri: <b>Nama, NIK, panggilan, 中文名</b>.</p>
+  const rowH=(e,i,arr)=>`<div class="erow"><input class="w" data-bind="emp" data-e="${e.id}" data-f="nama" value="${esc(e.nama)}" placeholder="Nama"><input data-bind="emp" data-e="${e.id}" data-f="pgl" value="${esc(e.pgl)}" placeholder="Panggilan"><input data-bind="emp" data-e="${e.id}" data-f="nik" value="${esc(e.nik)}" placeholder="NIK" inputmode="numeric"><label class="fld w" style="margin:0">Nama 中文<span class="tok"><input data-bind="emp" data-e="${e.id}" data-f="zh" value="${esc(e.zh||'')}" placeholder="${esc(zhOf(e))}" lang="zh" data-nt><button class="btn sm" data-act="zhauto" data-e="${e.id}" type="button">Otomatis</button></span></label><label class="fld w" style="margin:0">Tanggal lahir (opsional)<input type="date" data-bind="emp" data-e="${e.id}" data-f="lahir" value="${esc(e.lahir||'')}"></label><div class="eact"><div><button class="x" data-act="mv" data-e="${e.id}" data-n="-1" ${i===0?'disabled':''} aria-label="Naik">↑</button><button class="x" data-act="mv" data-e="${e.id}" data-n="1" ${i===arr.length-1?'disabled':''} aria-label="Turun">↓</button></div><div class="seg" style="margin:0">${tipeSeg(e)}</div><label class="sm mut" style="display:flex;align-items:center;gap:6px"><input type="checkbox" data-bind="aktif" data-e="${e.id}" ${e.aktif?'checked':''} style="width:20px;height:20px"> aktif</label><button class="x" data-act="delemp" data-e="${e.id}" aria-label="Hapus">🗑</button></div></div>`;
+  const ES=S.emps.filter(e=>!isReg(e)),ER=S.emps.filter(isReg);
+  const rowsS=ES.map((e,i)=>rowH(e,i,ES)).join(''),rowsR=ER.map((e,i)=>rowH(e,i,ER)).join('');
+  const addSeg=`<div class="h" style="margin:8px 0"><span class="mut sm">Masukkan sebagai:</span><div class="seg" style="margin:0">${['shift','reguler'].map(t=>`<button class="sc ${UI.addTipe===t?'on':''}" style="height:38px;${cstyle(t==='shift'?'4':'4HM')}" data-act="addtipe" data-v="${t}">${t==='shift'?'Shift':'Reguler'}</button>`).join('')}</div></div>`;
+  const dayT=[1,2,3,4,5,6,0].map(g=>`<button class="sc ${(S.regDays||[]).includes(g)?'on':''}" style="min-width:44px;height:38px;padding:0 8px;${cstyle('4')}" data-act="regday" data-v="${g}">${HSH[g]}</button>`).join('');
+  return `<section class="card" id="sec-bulk"><h3>📥 Input daftar karyawan</h3><p class="mut sm" style="margin:4px 0 8px" data-zhk="bulkhelp">Ketik atau tempel, <b>satu karyawan per baris</b>. Format: <b>Nama, NIK</b> (NIK boleh kosong). Panggilan dibuat otomatis dan <b>nama Mandarin</b> diambil dari panggilan, atau tulis sendiri: <b>Nama, NIK, panggilan, 中文名</b>.</p>
+   ${addSeg}
    <textarea id="bulk" data-bind="bulk" style="min-height:140px" placeholder="Budi Santoso, 82000001&#10;Muh. Andi, 82000002&#10;Rizky Pratama 82000003"></textarea>
    <div class="h" style="margin:10px 0 0"><span class="mut sm" id="bulkinfo">0 nama terdeteksi</span><button class="btn pri" data-act="bulkadd">Tambahkan semua</button></div></section>
-  <section class="card"><h3>Tambah satu karyawan</h3><div class="g2" style="margin-top:10px"><input id="ne-nama" placeholder="Nama"><input id="ne-pgl" placeholder="Panggilan"><input id="ne-nik" placeholder="NIK" inputmode="numeric"><button class="btn pri" data-act="addemp">Tambah</button></div></section>
-  <section class="card"><div class="h"><h3>Daftar karyawan</h3><span class="mut sm">${S.emps.length} orang</span></div>${S.emps.length?'<button class="btn sm" data-act="zhall" style="margin-bottom:6px">中文 Buat ulang nama Mandarin otomatis</button>':''}${rows||'<p class="mut">Belum ada.</p>'}<p class="mut sm" style="margin-bottom:0">Urutan di sini menentukan urutan di pesan WA. “Panggilan” dipakai di pembagian area.</p></section>
+  <section class="card"><h3>Tambah satu karyawan</h3>${addSeg}<div class="g2"><input id="ne-nama" placeholder="Nama"><input id="ne-pgl" placeholder="Panggilan"><input id="ne-nik" placeholder="NIK" inputmode="numeric"><button class="btn pri" data-act="addemp">Tambah</button></div></section>
+  <section class="card"><div class="h"><h3>Karyawan shift</h3><span class="mut sm">${ES.length} orang</span></div>${S.emps.length?'<button class="btn sm" data-act="zhall" style="margin-bottom:6px">中文 Buat ulang nama Mandarin otomatis</button>':''}${rowsS||'<p class="mut">Belum ada.</p>'}<p class="mut sm" style="margin-bottom:0">Urutan di sini menentukan urutan di pesan WA. “Panggilan” dipakai di pesan WA, nama Mandarin, dan pembagian area.</p></section>
+  <section class="card" id="sec-regemp"><div class="h"><h3>Karyawan reguler</h3><span class="mut sm">${ER.length} orang</span></div>
+   <p class="mut sm" style="margin:0 0 6px">Hari kerja karyawan reguler (otomatis hadir):</p><div class="seg" style="margin:0 0 8px">${dayT}</div>
+   ${rowsR||'<p class="mut">Belum ada karyawan reguler. Pilih “Reguler” saat menambah karyawan, atau ubah jenis di daftar.</p>'}</section>
   <section class="card"><h3>Kode shift</h3><p class="mut sm" style="margin:4px 0 10px" data-zhk="codehelp">Kode yang muncul di pilihan shift. Kode <b>OFF</b> tidak dihitung masuk.</p>
    <div class="chips">${S.codes.map((c,i)=>`<span class="chip" style="${cstyle(c)}">${esc(c)}<button data-act="delcode" data-i="${i}">×</button></span>`).join('')}<input class="chipin" placeholder="+ kode" data-bind="addcode"></div></section>
 `;
@@ -1000,16 +1032,16 @@ function vStat(){
   const dt=parse(UI.date),y=dt.getFullYear(),m=dt.getMonth(),n=new Date(y,m+1,0).getDate();
   const dates=[...Array(n)].map((_,i)=>y+'-'+pad(m+1)+'-'+pad(i+1));
   const act=S.emps.filter(e=>e.aktif),d=D(UI.date),onL=new Set(leavesOn(UI.date).map(l=>l.emp));
-  const counts={};let sched=0;
-  act.forEach(e=>{if(onL.has(e.id))return;const c=d.shift[e.id];if(c){counts[c]=(counts[c]||0)+1;sched++}});
-  const free=Math.max(0,act.length-sched-onL.size);
+  const counts={};let sched=0;const actS=act.filter(e=>!isReg(e));
+  actS.forEach(e=>{if(onL.has(e.id))return;const c=d.shift[e.id];if(c){counts[c]=(counts[c]||0)+1;sched++}});
+  const free=Math.max(0,actS.length-sched-actS.filter(e=>onL.has(e.id)).length);
   const codes=[...new Set(S.codes.concat(Object.keys(counts)))];
   const segs=codes.map(c=>[c,counts[c]||0,`hsl(${hue(c)} 65% 58%)`]).concat([['Cuti/izin',onL.size,'#5bb6e6'],['Belum diatur',free,'#d7dbe3']]).filter(x=>x[1]>0);
   const tot=segs.reduce((a,x)=>a+x[1],0);let acc=0;
   const stops=segs.map(x=>{const a=acc/tot*360;acc+=x[1];return `${x[2]} ${a}deg ${acc/tot*360}deg`}).join(',');
   const mc=new Set();dates.forEach(dd=>Object.values(D(dd).shift).forEach(c=>c&&mc.add(c)));
   const mcodes=[...new Set(S.codes.concat([...mc]))];
-  const trs=act.map(e=>{
+  const trs=actS.map(e=>{
     const cs=mcodes.map(c=>dates.filter(dd=>D(dd).shift[e.id]===c&&!S.leaves.some(l=>l.emp===e.id&&l.start<=dd&&dd<=l.end)).length);
     const cuti=dates.filter(dd=>S.leaves.some(l=>l.emp===e.id&&l.start<=dd&&dd<=l.end)).length;
     return `<tr><td data-nt><b>${esc(LANG==='zh'?zhN(e):e.nama)}</b></td>${cs.map(v=>`<td>${v||'·'}</td>`).join('')}<td>${cuti||'·'}</td></tr>`}).join('');
@@ -1059,8 +1091,8 @@ document.addEventListener('click',async ev=>{
   else if(a==='ghsync'){if(!ready){initGH(false);return}if(localDirty)await flush();else await pollGH();toast(SYNC==='ok'?'Sudah sinkron ✓':SYNCMSG())}
   else if(a==='ghoff'){if(await ask('Putuskan server GitHub di perangkat ini? Data di repo tidak dihapus, dan data tetap ada di perangkat ini.','Putuskan')){ghDisconnect();render()}}
   else if(a==='lang'){LANG=LANG==='dual'?'id':LANG==='id'?'zh':'dual';try{localStorage.setItem(LANGKEY,LANG)}catch(e){}render();toast(LANG==='dual'?'Indonesia + 中文':LANG==='zh'?'中文':'Bahasa Indonesia')}
-  else if(a==='zhauto'){const e=emp(ds.e);e.zh=zhName(e.nama);e.zhAuto=true;save();render()}
-  else if(a==='zhall'){if(await ask('Buat ulang nama Mandarin semua karyawan secara otomatis? Nama yang sudah Anda ubah sendiri ikut diganti.','Buat ulang')){S.emps.forEach(e=>{e.zh=zhName(e.nama);e.zhAuto=true});save();render();toast('Nama Mandarin diperbarui')}}
+  else if(a==='zhauto'){const e=emp(ds.e);e.zh=zhOf(e);e.zhAuto=true;save();render()}
+  else if(a==='zhall'){if(await ask('Buat ulang nama Mandarin semua karyawan secara otomatis? Nama yang sudah Anda ubah sendiri ikut diganti.','Buat ulang')){S.emps.forEach(e=>{e.zh=zhOf(e);e.zhAuto=true});save();render();toast('Nama Mandarin diperbarui')}}
   else if(a==='rename'){const v=await askText('Nama yang tampil di sapaan',S.nama);if(v!==null){S.nama=v.trim()||'Admin';save();render()}}
   else if(a==='postann'){const i=$('#annin'),t=i.value.trim();if(!t){i.focus();return}S.ann.push({id:uid(),text:t,ts:Date.now()});save();render();toast('Pengumuman diposting ✓')}
   else if(a==='delann'){if(await ask('Hapus pengumuman ini?','Hapus')){S.ann=S.ann.filter(x=>x.id!==ds.id);save();render()}}
@@ -1075,7 +1107,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='copyprev'){
     const w=W(UI.date),p=D(addDays(UI.date,-1));
     if((Object.keys(w.shift).length||w.areas.length)&&!await ask('Timpa data hari ini dengan data kemarin?','Timpa'))return;
-    w.shift=clone(p.shift);w.areas=clone(p.areas);w.piket=clone(p.piket);w.driver=clone(p.driver);save();render();toast('Disalin dari kemarin')}
+    w.shift=clone(p.shift);w.reg=clone(p.reg||{});w.areas=clone(p.areas);w.piket=clone(p.piket);w.driver=clone(p.driver);save();render();toast('Disalin dari kemarin')}
   else if(a==='setshift'){const w=W(UI.date);if(w.shift[ds.e]===ds.c)delete w.shift[ds.e];else w.shift[ds.e]=ds.c;save();render()}
   else if(a==='brush'){UI.brush=ds.c;render()}
   else if(a==='cell'){
@@ -1083,13 +1115,17 @@ document.addEventListener('click',async ev=>{
     const c=w.shift[ds.e]||'';b.textContent=c;b.style.cssText=c?cstyle(c):''}
   else if(a==='fillrow'){
     const mon=weekStart(UI.date);for(let i=0;i<7;i++){const dt=addDays(mon,i);if(S.leaves.some(l=>l.emp===ds.e&&l.start<=dt&&dt<=l.end))continue;const w=W(dt);if(UI.brush==='')delete w.shift[ds.e];else w.shift[ds.e]=UI.brush}save();render()}
-  else if(a==='mv'){const i=S.emps.findIndex(e=>e.id===ds.e),j=i+ +ds.n;if(j>=0&&j<S.emps.length){[S.emps[i],S.emps[j]]=[S.emps[j],S.emps[i]];save();render()}}
+  else if(a==='mv'){const i=S.emps.findIndex(e=>e.id===ds.e),r=isReg(S.emps[i]);let j=i+ +ds.n;while(j>=0&&j<S.emps.length&&isReg(S.emps[j])!==r)j+= +ds.n;if(j>=0&&j<S.emps.length){[S.emps[i],S.emps[j]]=[S.emps[j],S.emps[i]];save();render()}}
+  else if(a==='settipe'){emp(ds.e).tipe=ds.v;save();render()}
+  else if(a==='addtipe'){UI.addTipe=ds.v;const bk=$('#bulk'),keep=bk?bk.value:'';render();if($('#bulk'))$('#bulk').value=keep}
+  else if(a==='regday'){const g=+ds.v;S.regDays=(S.regDays||[]).includes(g)?S.regDays.filter(x=>x!==g):[...(S.regDays||[]),g].sort();save();render()}
+  else if(a==='setreg'){const w=W(UI.date);w.reg=w.reg||{};const def=regWork(UI.date)?'H':'OFF';if(ds.v===def)delete w.reg[ds.e];else w.reg[ds.e]=ds.v;save();render()}
   else if(a==='delemp'){const e=emp(ds.e);if(await ask('Hapus '+e.nama+'? Cuti dan jadwalnya ikut terhapus.','Hapus')){S.emps=S.emps.filter(x=>x.id!==e.id);S.leaves=S.leaves.filter(l=>l.emp!==e.id);Object.values(S.days).forEach(d=>delete d.shift[e.id]);save();render()}}
-  else if(a==='addemp'){const nama=$('#ne-nama').value.trim();if(!nama){toast('Isi nama dulu');return}S.emps.push({id:uid(),nama,pgl:($('#ne-pgl').value.trim()||autoPgl(nama)).toLowerCase(),nik:$('#ne-nik').value.trim(),aktif:true,zh:zhName(nama),zhAuto:true});save();render();toast('Karyawan ditambahkan')}
+  else if(a==='addemp'){const nama=$('#ne-nama').value.trim();if(!nama){toast('Isi nama dulu');return}S.emps.push({id:uid(),nama,pgl:($('#ne-pgl').value.trim()||autoPgl(nama)).toLowerCase(),nik:$('#ne-nik').value.trim(),aktif:true,tipe:UI.addTipe||'shift',zhAuto:true});{const ne=S.emps[S.emps.length-1];ne.zh=zhOf(ne)}save();render();toast('Karyawan ditambahkan')}
   else if(a==='bulkadd'){
     const list=parseBulk($('#bulk').value);if(!list.length){toast('Belum ada nama untuk ditambahkan');return}
     const have=new Set(S.emps.map(e=>e.nama.toLowerCase()));let add=0,skip=0;
-    list.forEach(x=>{if(have.has(x.nama.toLowerCase())){skip++;return}have.add(x.nama.toLowerCase());S.emps.push({id:uid(),nama:x.nama,pgl:x.pgl,nik:x.nik,aktif:true,zh:x.zh||zhName(x.nama),zhAuto:!x.zh});add++});
+    list.forEach(x=>{if(have.has(x.nama.toLowerCase())){skip++;return}have.add(x.nama.toLowerCase());S.emps.push({id:uid(),nama:x.nama,pgl:x.pgl,nik:x.nik,aktif:true,tipe:UI.addTipe||'shift',zh:x.zh||zhName(x.pgl||x.nama),zhAuto:!x.zh});add++});
     save();render();toast(add+' karyawan ditambahkan'+(skip?' · '+skip+' dilewati (sudah ada)':''))}
   else if(a==='delcode'){S.codes.splice(+ds.i,1);save();render()}
   else if(a==='savecuti'){
@@ -1109,7 +1145,7 @@ document.addEventListener('input',ev=>{
   if(b==='kode'){W(UI.date).areas[+t.dataset.i].kode=t.value;save();refreshOutput()}
   else if(b==='label'){S.label=t.value;save();refreshOutput()}
   else if(b==='nasi'){W(UI.date).nasi=t.value;save();refreshOutput()}
-  else if(b==='emp'){const e=emp(t.dataset.e),f=t.dataset.f;e[f]=t.value;if(f==='zh')e.zhAuto=false;if(f==='nama'&&e.zhAuto!==false){e.zh=zhName(t.value);e.zhAuto=true;const z=document.querySelector(`input[data-e="${e.id}"][data-f="zh"]`);if(z){z.value=e.zh;z.placeholder=e.zh}}save()}
+  else if(b==='emp'){const e=emp(t.dataset.e),f=t.dataset.f;e[f]=t.value;if(f==='zh')e.zhAuto=false;if((f==='nama'||f==='pgl')&&e.zhAuto!==false){e.zh=zhOf(e);e.zhAuto=true;const z=document.querySelector(`input[data-e="${e.id}"][data-f="zh"]`);if(z){z.value=e.zh;z.placeholder=e.zh}}save()}
   else if(b==='label_zh'){S.label_zh=t.value;save();refreshOutput()}
   else if(b==='judul_zh'){S.judul_zh=t.value;save();refreshOutput()}
   else if(b==='cf'){UI.cf[t.dataset.f]=t.value}
