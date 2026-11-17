@@ -25,6 +25,15 @@ button{font-family:inherit}
 .hello h1{margin:0;font-size:27px;line-height:1.15;font-weight:700}
 .hello .nm{display:block;border:0;background:none;padding:0;font:inherit;font-size:27px;font-weight:700;color:var(--ink);text-align:left;cursor:pointer}
 .hello .nm small{font-size:13px;color:var(--mut);font-weight:600;margin-left:4px}
+.zhs{display:block;font-size:.72em;font-weight:600;color:var(--mut);line-height:1.25;margin-top:1px}
+.bar h2 .zhs{font-size:12px;margin-top:0}
+.tile span .zhs{font-size:10px;font-weight:500}
+nav .zhs{font-size:9px;font-weight:600;color:inherit;opacity:.85;margin-top:0}
+.zh2{display:block;font-size:.9em;color:var(--mut);margin-top:3px}
+.zh2b{font-size:12.5px;color:var(--mut);margin:4px 0 10px}
+ol.zh2b{padding-left:20px}
+#mtext{white-space:pre-line}#srvstat{white-space:pre-line}
+#toast{white-space:pre-line;max-width:92vw;text-align:center;border-radius:16px;line-height:1.35}
 .lang{border:1px solid var(--line);background:#fff;color:var(--pri);border-radius:99px;padding:6px 11px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;box-shadow:var(--sh);flex:none}
 .bar .lang{margin-left:6px;padding:5px 9px}
 .hdr-r{display:flex;align-items:center;gap:6px}
@@ -267,13 +276,15 @@ const hasCJK=s=>/[㐀-鿿]/.test(String(s||''));
 function zhName(n){n=String(n||'').trim();if(!n||hasCJK(n))return n;return n.split(/[\s\-]+/).map(zhWord).filter(Boolean).join('·')}
 
 /* ---------- bahasa tampilan (per perangkat) ---------- */
-const LANGKEY='atur-karyawan-lang';
-let LANG='id';try{LANG=localStorage.getItem(LANGKEY)==='zh'?'zh':'id'}catch(e){}
+const LANGKEY='atur-karyawan-lang2';
+let LANG='dual';try{const v=localStorage.getItem(LANGKEY);if(v==='id'||v==='zh'||v==='dual')LANG=v}catch(e){}
 const ZHDAY=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
 const zhDate=s=>{const d=parse(s);return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+ZHDAY[d.getDay()]};
-const dateL=s=>LANG==='zh'?zhDate(s):longDate(s);
+const dateL=s=>LANG==='zh'?zhDate(s):LANG==='dual'?longDate(s)+' · '+zhDate(s):longDate(s);
 let ZH={},ZHRX=[],ZHP={};
 ZH={
+'Daftar Hadir':'出勤名单','Daftar hadir':'出勤名单','Hadir':'出勤','Tidak hadir':'未出勤','Daftar hadir ›':'出勤名单 ›','👷 Kirim Daftar Hadir':'👷 发送出勤名单','PESAN 3 · DAFTAR HADIR':'消息 3 · 出勤名单',
+'Belum ada yang hadir. Atur shift di menu Pesan WA atau Jadwal.':'还没有出勤人员。请在“WA 消息”或“排班”菜单中安排班次。','Indonesia + 中文':'Indonesia + 中文','Jadwal hari ini':'今日排班',
 '+ Tambah area':'+ 添加区域','+ kode':'+ 代码','+ nama':'+ 姓名','orang':'人','Area Kerja':'工作区域','BELUM DIATUR':'未安排','Bahasa':'语言','Bahasa pesan':'消息语言',
 'Batal':'取消','Belum ada karyawan':'还没有员工','Belum ada.':'暂无。','Belum diatur':'未安排','Belum terdaftar':'未登记','Beranda':'首页','Berikutnya':'下一个','Berlangsung':'进行中',
 'Branch':'分支','Branch (kosongkan untuk default)':'分支（留空则为默认）','Buka Pesan WA ›':'打开 WA 消息 ›','CUTI / IZIN':'休假 / 请假','Cadangan data':'数据备份','Cuti':'休假',
@@ -324,7 +335,7 @@ ZH={
 };
 ZHRX=[
 [/^(\d+) orang$/,'$1 人'],[/^(\d+) nama terdeteksi$/,'检测到 $1 个姓名'],[/^Rekap (\S+) (\d{4})$/,(m,b,y)=>y+'年'+(BULAN.indexOf(b)+1)+'月汇总'],
-[/^Jadwal (\d+)\/(\d+)\/(\d{4})$/,'$3/$2/$1 排班'],[/^(\d+) masuk · (\d+) OFF · (\d+) cuti\/izin$/,'$1 人出勤 · $2 人休息 · $3 人休假/请假'],
+[/^Jadwal (\d+)\/(\d+)\/(\d{4})$/,'$3/$2/$1 排班'],[/^(\d+) hadir · (\d+) OFF · (\d+) cuti\/izin$/,'$1 人出勤 · $2 人休息 · $3 人休假/请假'],
 [/^(\d+) menit yang lalu$/,'$1 分钟前'],[/^(\d+) jam yang lalu$/,'$1 小时前'],[/^(\d+) hari yang lalu$/,'$1 天前'],
 [/^(\d+) karyawan ditambahkan · (\d+) dilewati \(sudah ada\)$/,'已添加 $1 名员工 · 跳过 $2 名（已存在）'],[/^(\d+) karyawan ditambahkan$/,'已添加 $1 名员工'],
 [/^Hapus (.+)\? Cuti dan jadwalnya ikut terhapus\.$/,'删除 $1？其休假和排班也将一并删除。'],
@@ -352,27 +363,43 @@ needemp:'请先录入员工名单，之后即可制作排班和 WhatsApp 消息�
 };
 
 function TR(k){if(Object.prototype.hasOwnProperty.call(ZH,k))return ZH[k];for(const [re,to] of ZHRX){if(re.test(k))return k.replace(re,to)}return k}
-const T=t=>LANG==='zh'&&t!=null?TR(String(t)):t;
+const Z=t=>LANG==='zh'&&t!=null?TR(String(t)):t;
+const T=t=>{if(t==null||LANG==='id')return t;const s0=String(t),r=TR(s0);if(LANG==='zh'||r===s0)return r;if(hasCJK(s0))return s0;const z=dualZh(s0,r);return s0.length>34?s0+'\n'+z:s0+' · '+z};
+const bil=t=>{const r=TR(t);return LANG==='zh'?esc(r):LANG==='dual'&&r!==t&&!hasCJK(t)?esc(t)+'<small class="zhs">'+esc(dualZh(t,r))+'</small>':esc(t)};
+const DUALSKIP=/^\d+(\/\d+)? (orang|karyawan|nama terdeteksi)$/;
+const dualZh=(k,r)=>{const m=k.match(/^(\S+\s)/);if(m&&!/[A-Za-z0-9]/.test(m[1])&&r.startsWith(m[1]))return r.slice(m[1].length);return r};
 function trDom(root){
-  if(LANG!=='zh'||!root)return;
-  root.querySelectorAll('[data-zhk]').forEach(el=>{const h=ZHP[el.getAttribute('data-zhk')];if(h!=null)el.innerHTML=h});
-  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const pe=n.parentElement;if(!pe||pe.closest('[data-nt],.bubble,script,style,textarea,code'))return NodeFilter.FILTER_REJECT;return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
+  if(LANG==='id'||!root)return;
+  const dual=LANG==='dual';
+  root.querySelectorAll('[data-zhk]').forEach(el=>{const h=ZHP[el.getAttribute('data-zhk')];if(h==null)return;
+    if(!dual){el.innerHTML=h;return}
+    const nx=el.nextElementSibling;if(nx&&nx.classList.contains('zh2b'))return;
+    const tag=el.tagName==='OL'?'ol':'div';
+    el.insertAdjacentHTML('afterend','<'+tag+' class="zh2b'+(tag==='ol'?' steps':'')+'" data-nt>'+h.replace(/id="qrleft"/g,'class="qrleft"')+'</'+tag+'>')});
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const pe=n.parentElement;if(!pe||pe.closest('[data-nt],.bubble,script,style,textarea,code,.zh2,.zh2b,.zhs'))return NodeFilter.FILTER_REJECT;return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
   const list=[];while(w.nextNode())list.push(w.currentNode);
-  list.forEach(n=>{const v=n.nodeValue,k=v.trim(),r=TR(k);if(r!==k)n.nodeValue=v.replace(k,r)});
-  root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(el=>{if(el.closest('[data-nt]'))return;['placeholder','aria-label','title'].forEach(a=>{const v=el.getAttribute(a);if(v){const r=TR(v.trim());if(r!==v.trim())el.setAttribute(a,r)}})});
+  list.forEach(n=>{const v=n.nodeValue,k=v.trim(),r=TR(k);if(r===k)return;
+    if(!dual){n.nodeValue=v.replace(k,r);return}
+    if(DUALSKIP.test(k)||hasCJK(k))return;
+    const pe=n.parentElement,z=dualZh(k,r);
+    if(k.length>30&&!['OPTION','BUTTON','A','B','SPAN'].includes(pe.tagName)){const sp=document.createElement('span');sp.className='zh2';sp.textContent=z;pe.insertBefore(sp,n.nextSibling)}
+    else n.nodeValue=v.replace(k,k+(pe.closest('h2,h3,h4,.sec,.bhead,.tlt')?' · ':' ')+z);
+  });
+  root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(el=>{if(el.closest('[data-nt]'))return;['placeholder','aria-label','title'].forEach(a=>{const v=el.getAttribute(a);if(!v)return;const k=v.trim(),r=TR(k);if(r===k)return;
+    if(!dual)el.setAttribute(a,r);else if(!hasCJK(k)&&(a!=='placeholder'||k.length<=18))el.setAttribute(a,k+' · '+dualZh(k,r))})});
 }
 const ZHJENIS={'Cuti Tahunan':'年假','Cuti Sakit':'病假','Izin':'事假','Cuti Khusus':'特别假','Cuti Hamil':'产假','Cuti':'休假','Sakit':'病假'};
-const jenisL=j=>LANG==='zh'?(ZHJENIS[j]||j):j;
+const jenisL=j=>{const z=ZHJENIS[j];return LANG==='zh'?(z||j):LANG==='dual'&&z?j+' ('+z+')':j};
 const zhN=e=>e.zh||zhName(e.nama);
-const dn=e=>e?(LANG==='zh'?zhN(e)+' ('+e.nama+')':e.nama):'';
+const dn=e=>e?(LANG==='zh'?zhN(e)+' ('+e.nama+')':LANG==='dual'?e.nama+' '+zhN(e):e.nama):'';
 
 
 /* ---------- data ---------- */
 const KEY='atur-karyawan-v2';
 let storeOK=true;
-function empty(){return {nama:'Admin',emps:[],codes:['4','4HM','OFF'],label:'Shift pagi – malam',label_zh:'早班 – 夜班',judul:'LAPORAN HARIAN SHIFT',judul_zh:'每日排班报告',bahasa:'id',gaya:'menarik',leaves:[],days:{},ann:[]}}
+function empty(){return {nama:'Admin',emps:[],codes:['4','4HM','OFF'],label:'Shift pagi – malam',label_zh:'早班 – 夜班',judul:'LAPORAN HARIAN SHIFT',judul_zh:'每日排班报告',bahasa:'dual',bv2:1,gaya:'menarik',leaves:[],days:{},ann:[]}}
 function load(){try{const r=localStorage.getItem(KEY);if(!r)return null;return norm(JSON.parse(r))}catch(e){return null}}
-function norm(o){if(!o||!Array.isArray(o.emps))return null;o.nama=o.nama||'Admin';o.codes=o.codes||['4','4HM','OFF'];o.label=o.label||'Shift pagi – malam';o.leaves=o.leaves||[];o.days=o.days||{};o.judul=o.judul||'LAPORAN HARIAN SHIFT';o.gaya=o.gaya||'menarik';o.ann=o.ann||[];o.label_zh=o.label_zh||'早班 – 夜班';o.judul_zh=o.judul_zh||'每日排班报告';o.bahasa=['id','zh','dual'].includes(o.bahasa)?o.bahasa:'id';o.emps.forEach(e=>{if(e.zh===undefined){e.zh=zhName(e.nama);e.zhAuto=true}});return o}
+function norm(o){if(!o||!Array.isArray(o.emps))return null;o.nama=o.nama||'Admin';o.codes=o.codes||['4','4HM','OFF'];o.label=o.label||'Shift pagi – malam';o.leaves=o.leaves||[];o.days=o.days||{};o.judul=o.judul||'LAPORAN HARIAN SHIFT';o.gaya=o.gaya||'menarik';o.ann=o.ann||[];o.label_zh=o.label_zh||'早班 – 夜班';o.judul_zh=o.judul_zh||'每日排班报告';if(!o.bv2){o.bahasa='dual';o.bv2=1}o.bahasa=['id','zh','dual'].includes(o.bahasa)?o.bahasa:'dual';o.emps.forEach(e=>{if(e.zh===undefined){e.zh=zhName(e.nama);e.zhAuto=true}});return o}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(DIRTYKEY,'1')}catch(e){storeOK=false;warn()}localDirty=true;if(BACK!=='local'&&ready&&SYNC!=='err')setSync('saving');schedFlush()}
 try{localStorage.setItem('_t','1');localStorage.removeItem('_t');localStorage.removeItem('atur-karyawan-v1')}catch(e){storeOK=false}
 let S=load()||empty();
@@ -605,7 +632,7 @@ function stopScan(){if(scan){scan.on=false;if(scan.stream)scan.stream.getTracks(
 async function startScan(){
   stopScan();
   const ov=document.createElement('div');ov.id='scanov';
-  ov.innerHTML='<div class="vw"><video playsinline muted autoplay></video><div class="fr"></div></div><p>'+(LANG==='zh'?'将摄像头对准已连接设备屏幕上的二维码<br><small>（存储 → 连接其他手机）</small>':'Arahkan kamera ke QR di layar perangkat yang sudah terhubung<br><small>(Penyimpanan → Hubungkan HP lain)</small>')+'</p><button class="btn" data-act="scanclose" style="min-width:140px">'+T('Batal')+'</button>';
+  ov.innerHTML='<div class="vw"><video playsinline muted autoplay></video><div class="fr"></div></div><p>'+(LANG==='zh'?'将摄像头对准已连接设备屏幕上的二维码<br><small>（存储 → 连接其他手机）</small>':'Arahkan kamera ke QR di layar perangkat yang sudah terhubung<br><small>(Penyimpanan → Hubungkan HP lain)</small>'+(LANG==='dual'?'<br><small>将摄像头对准已连接设备屏幕上的二维码</small>':''))+'</p><button class="btn" data-act="scanclose" style="min-width:140px">'+T('Batal')+'</button>';
   document.body.appendChild(ov);scan={on:true,stream:null};
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){stopScan();toast('Kamera tidak tersedia di sini');return}
   let stream;
@@ -725,24 +752,22 @@ const nikOf=e=>e.nik?' ('+e.nik+')':'';
 const cap=s=>s.replace(/(^|[\s.\-])([a-z])/g,(m,a,b)=>a+b.toUpperCase());
 const BAR='━━━━━━━━━━━━━━━';
 const BL=()=>S.bahasa||'id';
-const H=(id,zh)=>{const b=BL();return b==='zh'?zh:b==='dual'?id+' / '+zh:id};
+const H=(id,zh)=>{const b=BL();return b==='zh'?zh:b==='dual'?id+' · '+zh:id};
 const nmB=e=>{const b=BL();return b==='zh'?zhN(e)+' '+e.nama:b==='dual'?e.nama+' '+zhN(e):e.nama};
-const dateB=s2=>{const b=BL();return b==='zh'?zhDate(s2):b==='dual'?longDate(s2)+' / '+zhDate(s2):longDate(s2)};
-const jenisB=j=>{const b=BL(),z=ZHJENIS[j];return b==='zh'?(z||j):b==='dual'&&z?j+' / '+z:j};
+const dateB=s2=>{const b=BL();return b==='zh'?zhDate(s2):b==='dual'?longDate(s2)+' · '+zhDate(s2):longDate(s2)};
+const jenisB=j=>{const b=BL(),z=ZHJENIS[j];return b==='zh'?(z||j):b==='dual'&&z?j+' ('+z+')':j};
 const dmyB=s2=>{const [y,m,d]=s2.split('-').map(Number);return BL()==='zh'?y+'/'+m+'/'+d:d+'/'+m+'/'+y};
 const labelB=()=>H(S.label||'Shift pagi – malam',S.label_zh||'早班 – 夜班');
-const judulB=()=>{const b=BL(),a=S.judul||'LAPORAN HARIAN SHIFT',z=S.judul_zh||'每日排班报告';return b==='zh'?['📋 *'+z+'*']:b==='dual'?['📋 *'+a+'*','📋 *'+z+'*']:['📋 *'+a+'*']};
+const judulB=()=>{const b=BL(),a=S.judul||'LAPORAN HARIAN SHIFT',z=S.judul_zh||'每日排班报告';return b==='zh'?['📋 *'+z+'*']:b==='dual'?['📋 *'+a+' · '+z+'*']:['📋 *'+a+'*']};
 function nickMap(){const m={};S.emps.forEach(e=>{const first=(e.nama||'').split(/\s+/).filter(w=>!/^(muh|moh|m|md|mhd|muhammad|mohammad)\.?$/i.test(w))[0];[e.pgl,e.nama,first].forEach(k=>{if(k){k=String(k).toLowerCase().trim();if(!(k in m))m[k]=e}})});return m}
 const taskL=t=>t==='Piket'?H('Piket','值班'):t==='Driver'?H('Driver','司机'):t;
 function nickB(n,nm){const e=(nm||nickMap())[String(n).toLowerCase().trim()],b=BL();if(b==='id')return cap(n);const z=e?zhN(e):zhName(cap(n));return b==='zh'?z:cap(n)+' '+z}
 function attendance(date){
-  const d=D(date),L=leavesOn(date),onL=new Set(L.map(l=>l.emp)),act=S.emps.filter(e=>e.aktif),nm=nickMap(),tasks={},extra=[];
-  const add=(n,label)=>{const k=String(n).toLowerCase().trim(),e=nm[k];if(e&&e.aktif){(tasks[e.id]=tasks[e.id]||[]);if(!tasks[e.id].includes(label))tasks[e.id].push(label)}else if(!(e&&!e.aktif)){let x=extra.find(y=>y.k===k);if(!x){x={k,nick:n,t:[]};extra.push(x)}if(!x.t.includes(label))x.t.push(label)}};
-  d.areas.forEach(a=>a.names.forEach(n=>add(n,a.kode||'-')));d.piket.forEach(n=>add(n,'Piket'));d.driver.forEach(n=>add(n,'Driver'));
-  const masuk=[],off=[],belum=[],bentrok=[];
-  act.forEach(e=>{if(onL.has(e.id)){if(tasks[e.id])bentrok.push(e);return}const c=d.shift[e.id]||'';if(c&&isOff(c)){off.push(e);if(tasks[e.id])bentrok.push(e);return}if(c||tasks[e.id])masuk.push({e,c,t:tasks[e.id]||[]});else belum.push(e)});
-  return {masuk,off,cuti:L,belum,extra,bentrok,total:masuk.length+extra.length};
+  const d=D(date),L=leavesOn(date),onL=new Set(L.map(l=>l.emp)),act=S.emps.filter(e=>e.aktif),hadir=[],off=[],belum=[];
+  act.forEach(e=>{if(onL.has(e.id))return;const c=d.shift[e.id]||'';if(!c)belum.push(e);else if(isOff(c))off.push(e);else hadir.push({e,c})});
+  return {hadir,off,cuti:L,belum,total:hadir.length};
 }
+const qtyB=(n,id,zh)=>{const b=BL();return b==='zh'?n+' '+zh:b==='dual'?n+' '+id+' · '+n+' '+zh:n+' '+id};
 function msg1(date){
   const d=D(date),L=leavesOn(date),onL=new Set(L.map(l=>l.emp));
   const sh=S.emps.filter(e=>e.aktif&&d.shift[e.id]&&!onL.has(e.id));
@@ -758,7 +783,7 @@ function msg1(date){
   lines.push(...judulB(),'🗓️ *'+dateB(date)+'*',BAR,'');
   if(L.length){lines.push('🌴 *'+H('CUTI / IZIN','休假 / 请假')+'*');L.forEach(l=>{const e=emp(l.emp);lines.push('• '+nmB(e)+nikOf(e));lines.push('   ↳ '+jenisB(l.jenis)+' · '+dmyB(l.start)+' – '+dmyB(l.end))});lines.push('')}
   if(sh.length){lines.push('⏰ *'+labelB()+'*');sh.forEach(e=>{const c=d.shift[e.id];lines.push((isOff(c)?'😴 ':'✅ ')+nmB(e)+nikOf(e)+' — *'+c+'*')});lines.push('')}
-  if(nasi!=='')lines.push('🍱 *'+H('Nasi siang','午餐')+':* '+nasi+' '+H('porsi','份'));
+  if(nasi!=='')lines.push('🍱 *'+H('Nasi siang','午餐')+':* '+qtyB(nasi,'porsi','份'));
   return lines.join('\n').trim();
 }
 function msg2(date){
@@ -781,25 +806,11 @@ function msg2(date){
   return p.join('\n').trim();
 }
 function msg3(date){
-  const A=attendance(date),b=BL(),p=[],nm=nickMap();
-  if(!A.total&&!A.off.length&&!A.cuti.length)return '';
-  const tl2=(c,t)=>[c,...t.map(taskL)].filter(Boolean).join(' · ');
-  const rows=A.masuk.map(m=>nmB(m.e)+nikOf(m.e)+(tl2(m.c,m.t)?' — '+tl2(m.c,m.t):'')).concat(A.extra.map(x=>{const c=cap(x.nick),z=zhName(c);return (b==='id'?c:b==='zh'?z+' '+c:c+' '+z)+' — '+x.t.map(taskL).join(' · ')}));
-  const names=a=>a.map(e=>BL()==='id'?e.nama:BL()==='zh'?zhN(e):e.nama+' '+zhN(e)).join(', ');
-  if(S.gaya==='polos'){
-    p.push(H('Daftar Karyawan Masuk','今日出勤名单'),dateB(date),'',H('Masuk','出勤')+' : '+A.total+' '+H('orang','人'));
-    rows.forEach((r,i)=>p.push((i+1)+'. '+r));
-    if(A.off.length)p.push('','OFF ('+A.off.length+') : '+names(A.off));
-    if(A.cuti.length)p.push(H('Cuti/izin','休假/请假')+' ('+A.cuti.length+') : '+names(A.cuti.map(l=>emp(l.emp))));
-    return p.join('\n').trim();
-  }
-  p.push('👷 *'+H('DAFTAR KARYAWAN MASUK','今日出勤名单')+'*','🗓️ *'+dateB(date)+'*',BAR,'');
-  p.push('✅ *'+H('Masuk','出勤')+': '+A.total+' '+H('orang','人')+'*');
-  rows.forEach((r,i)=>p.push((i+1)+'. '+r));
-  if(A.off.length||A.cuti.length)p.push('');
-  if(A.off.length)p.push('😴 *OFF ('+A.off.length+'):* '+names(A.off));
-  if(A.cuti.length)p.push('🌴 *'+H('Cuti/izin','休假/请假')+' ('+A.cuti.length+'):* '+names(A.cuti.map(l=>emp(l.emp))));
-  return p.join('\n').trim();
+  const A=attendance(date);if(!A.total)return '';
+  const pol=S.gaya==='polos';
+  const rows=A.hadir.map((m,i)=>(i+1)+'. '+nmB(m.e)+(pol?(m.e.nik?' '+m.e.nik:'')+' ('+m.c+')':nikOf(m.e)+' — '+m.c));
+  if(pol)return [H('Daftar Hadir','出勤名单'),dateB(date),'',H('Hadir','出勤')+' : '+qtyB(A.total,'orang','人'),...rows].join('\n');
+  return ['👷 *'+H('DAFTAR HADIR','出勤名单')+'*','🗓️ *'+dateB(date)+'*',BAR,'','✅ *'+H('Hadir','出勤')+': '+qtyB(A.total,'orang','人')+'*',...rows].join('\n');
 }
 const autoPgl=n=>{const w=n.trim().split(/\s+/);const f=w.find(x=>!/^(muh|muhammad|moh|mohammad|mhd|m|md)\.?$/i.test(x));return (f||w[0]||'').replace(/[.,]/g,'').toLowerCase()};
 function parseBulk(txt){
@@ -829,23 +840,23 @@ const ago=ts=>{const m=Math.floor((Date.now()-ts)/6e4);if(m<1)return T('baru saj
 const waLink=t=>'https://wa.me/?text='+encodeURIComponent(t);
 
 /* ---------- views ---------- */
-const TITLE={masuk:'Daftar Masuk',server:'Penyimpanan',pesan:'Pesan WA',jadwal:'Jadwal Shift',cuti:'Cuti & Izin',emp:'Karyawan',stat:'Ringkasan'};
+const TITLE={masuk:'Daftar Hadir',server:'Penyimpanan',pesan:'Pesan WA',jadwal:'Jadwal Shift',cuti:'Cuti & Izin',emp:'Karyawan',stat:'Ringkasan'};
 const needEmp=()=>`<section class="card empty"><div class="big">${ic('users')}</div><h3>Belum ada karyawan</h3><p class="mut" style="margin:6px 0 14px" data-zhk="needemp">Masukkan daftar nama karyawan dulu, setelah itu jadwal dan pesan WhatsApp bisa dibuat.</p><button class="btn pri" data-act="go" data-v="emp" data-s="bulk">Input daftar karyawan</button></section>`;
 function tl(color,title,body,icon,foot){return `<div class="tl" style="--c:${color}"><div class="tlm"><div class="tlt">${title}</div><div class="tlb" data-nt>${body}</div>${foot?`<div class="tlf">${foot}</div>`:''}</div><div class="tli">${ic(icon)}</div></div>`}
 function vHome(){
   const date=UI.date,today=ymd(new Date()),d=D(date),act=S.emps.filter(e=>e.aktif),L=leavesOn(date),onL=new Set(L.map(l=>l.emp));
-  const TL=[['pesan','Pesan WA','chat','#ffe8de','#ef5a2a',''],['jadwal','Jadwal Shift','cal','#fff1d6','#e8930c',''],['cuti','Cuti & Izin','sun','#dff1fb','#2a8cc7',''],['emp','Karyawan','users','#e5f6d6','#5aa21a',''],['pesan','Area Kerja','map','#fde3e5','#c81e2b','sec-area'],['stat','Ringkasan','chart','#e3e9f7','#13295e',''],['masuk','Daftar Masuk','check','#d9f3ef','#1a9a8a',''],['server','Penyimpanan','cloud','#e9ebf0','#13295e','']];
+  const TL=[['pesan','Pesan WA','chat','#ffe8de','#ef5a2a',''],['jadwal','Jadwal Shift','cal','#fff1d6','#e8930c',''],['cuti','Cuti & Izin','sun','#dff1fb','#2a8cc7',''],['emp','Karyawan','users','#e5f6d6','#5aa21a',''],['pesan','Area Kerja','map','#fde3e5','#c81e2b','sec-area'],['stat','Ringkasan','chart','#e3e9f7','#13295e',''],['masuk','Daftar Hadir','check','#d9f3ef','#1a9a8a',''],['server','Penyimpanan','cloud','#e9ebf0','#13295e','']];
   const cards=[];
   if(!S.emps.length)cards.push(tl('#13295e','Selamat datang 👋','Mulai dengan memasukkan daftar nama karyawan, lalu atur shift dan kirim pesan ke WhatsApp.','users',`<button class="btn pri sm" data-act="go" data-v="emp" data-s="bulk">Input karyawan</button>`));
   else{
     const At=attendance(date);
-    cards.push(tl('#f5a623',T(date===today?'Jadwal hari ini':'Jadwal '+fmtDMY(date)),T(`${At.total} masuk · ${At.off.length} OFF · ${At.cuti.length} cuti/izin`)+(At.total+At.off.length===0?'\n'+T('Shift belum diatur.'):''),'cal',`<button class="lnk" data-act="go" data-v="masuk">Daftar masuk ›</button><button class="lnk" data-act="go" data-v="pesan">Buka Pesan WA ›</button>`));
-    if(L.length)cards.push(tl('#2a8cc7','Sedang cuti / izin',L.map(l=>esc(dn(emp(l.emp)))+' · '+esc(jenisL(l.jenis))+' '+T('s/d')+' '+fmtDMY(l.end)).join('\n'),'sun',`<button class="lnk" data-act="go" data-v="cuti">Kelola ›</button>`));
+    cards.push(tl('#f5a623',date===today?'Jadwal hari ini':'Jadwal '+fmtDMY(date),T(`${At.total} hadir · ${At.off.length} OFF · ${At.cuti.length} cuti/izin`)+(At.total+At.off.length===0?'\n'+T('Shift belum diatur.'):''),'cal',`<button class="lnk" data-act="go" data-v="masuk">Daftar hadir ›</button><button class="lnk" data-act="go" data-v="pesan">Buka Pesan WA ›</button>`));
+    if(L.length)cards.push(tl('#2a8cc7','Sedang cuti / izin',L.map(l=>esc(dn(emp(l.emp)))+' · '+esc(jenisL(l.jenis))+' '+(LANG==='zh'?'至':'s/d')+' '+fmtDMY(l.end)).join('\n'),'sun',`<button class="lnk" data-act="go" data-v="cuti">Kelola ›</button>`));
     const ref=parse(date);
-    act.filter(e=>e.lahir).map(e=>{const [,m,dd]=e.lahir.split('-').map(Number);let n=new Date(ref.getFullYear(),m-1,dd);if(n<ref)n=new Date(ref.getFullYear()+1,m-1,dd);return {e,diff:Math.round((n-ref)/864e5),dd,m}}).filter(x=>x.diff<=7).sort((a,b)=>a.diff-b.diff).forEach(x=>cards.push(tl('#8cc63f','Ulang tahun 🎂',esc(dn(x.e))+(LANG==='zh'?(x.diff===0?' 今天生日 🎉':' '+x.diff+' 天后生日（'+x.m+'月'+x.dd+'日）'):(x.diff===0?' ulang tahun hari ini 🎉':' ulang tahun dalam '+x.diff+' hari ('+x.dd+' '+BULAN[x.m-1]+')')),'cake','')));
+    act.filter(e=>e.lahir).map(e=>{const [,m,dd]=e.lahir.split('-').map(Number);let n=new Date(ref.getFullYear(),m-1,dd);if(n<ref)n=new Date(ref.getFullYear()+1,m-1,dd);return {e,diff:Math.round((n-ref)/864e5),dd,m}}).filter(x=>x.diff<=7).sort((a,b)=>a.diff-b.diff).forEach(x=>cards.push(tl('#8cc63f','Ulang tahun 🎂',esc(dn(x.e))+(()=>{const zh=x.diff===0?' 今天生日 🎉':' '+x.diff+' 天后生日（'+x.m+'月'+x.dd+'日）',id=x.diff===0?' ulang tahun hari ini 🎉':' ulang tahun dalam '+x.diff+' hari ('+x.dd+' '+BULAN[x.m-1]+')';return LANG==='zh'?zh:LANG==='dual'?id+'\n'+zh.trim():id})(),'cake','')));
   }
   S.ann.slice().sort((a,b)=>b.ts-a.ts).forEach(a=>cards.push(tl('#c81e2b','Pengumuman','<span data-nt>'+esc(a.text)+'</span>','mega',`<span class="mut">${ago(a.ts)}</span><a class="lnk" target="_blank" rel="noopener" href="${waLink('📢 *PENGUMUMAN*\n🗓️ '+longDate(today)+'\n'+BAR+'\n'+a.text)}">Kirim WA ›</a><button class="lnk" style="color:var(--mut)" data-act="delann" data-id="${a.id}">Hapus</button>`)));
-  return `<section class="card menu">${TL.map(t=>`<button class="tile" data-act="go" data-v="${t[0]}" data-s="${t[5]}"><span class="ib" style="background:${t[3]};color:${t[4]}">${ic(t[2])}</span><span>${t[1]}</span></button>`).join('')}</section>
+  return `<section class="card menu">${TL.map(t=>`<button class="tile" data-act="go" data-v="${t[0]}" data-s="${t[5]}"><span class="ib" style="background:${t[3]};color:${t[4]}">${ic(t[2])}</span><span data-nt>${bil(t[1])}</span></button>`).join('')}</section>
   <div class="sec">Timeline</div>
   <div class="post"><div class="av" data-nt>${esc(initials(S.nama))}</div><input id="annin" placeholder="Tulis pengumuman untuk tim…" enterkeyhint="send"><button class="sendb" data-act="postann" aria-label="Kirim pengumuman">${ic('send')}</button></div>
   ${cards.join('')}`;
@@ -877,23 +888,20 @@ function nickZh(n){const e=nickMap()[String(n).toLowerCase().trim()];return e?zh
 function langSel(){return `<label class="fld" style="margin:0">Bahasa pesan<select data-bind="bahasa"><option value="id" ${S.bahasa==='id'?'selected':''}>🇮🇩 Indonesia</option><option value="zh" ${S.bahasa==='zh'?'selected':''}>🇨🇳 中文</option><option value="dual" ${S.bahasa==='dual'?'selected':''}>🇮🇩+🇨🇳 Indonesia + 中文</option></select></label>`}
 function vMasuk(){
   if(!S.emps.length)return needEmp();
-  const A=attendance(UI.date),nm=nickMap();
-  const sb=c=>c?`<span class="badge" style="${cstyle(c)}">${esc(c)}</span>`:'';
-  const tb=t=>t.map(x=>`<span class="badge" data-nt>${esc(x==='Piket'?T('Piket'):x==='Driver'?T('Driver'):x)}</span>`).join('');
-  const rows=A.masuk.map((m,i)=>`<div class="mrow"><span class="no">${i+1}</span><div class="grow"><b data-nt>${esc(m.e.nama)}</b> <span class="zhn" data-nt>${esc(zhN(m.e))}</span><div class="mut sm">${esc(m.e.nik||'')}</div></div><div class="bdg">${sb(m.c)}${tb(m.t)}</div></div>`).join('')
-   +A.extra.map((x,i)=>`<div class="mrow"><span class="no">${A.masuk.length+i+1}</span><div class="grow"><b data-nt>${esc(cap(x.nick))}</b> <span class="zhn" data-nt>${esc(zhName(cap(x.nick)))}</span><div class="mut sm">Belum terdaftar</div></div><div class="bdg">${tb(x.t)}</div></div>`).join('');
+  const A=attendance(UI.date);
+  const rows=A.hadir.map((m,i)=>`<div class="mrow"><span class="no">${i+1}</span><div class="grow"><b data-nt>${esc(m.e.nama)}</b> <span class="zhn" data-nt>${esc(zhN(m.e))}</span><div class="mut sm" data-nt>${esc(m.e.nik||'')}</div></div><span class="badge" style="${cstyle(m.c)}" data-nt>${esc(m.c)}</span></div>`).join('');
   const nl=a=>a.length?`<div class="nlist" data-nt>${a.map(e=>`<span>${esc(dn(e))}</span>`).join('')}</div>`:'<p class="mut sm" style="margin:0">Tidak ada.</p>';
-  return `<div class="stats"><div class="stat"><b>${A.total}</b><span>Masuk</span></div><div class="stat"><b>${A.off.length}</b><span>OFF</span></div><div class="stat"><b>${A.cuti.length}</b><span>Cuti / izin</span></div><div class="stat"><b>${A.belum.length}</b><span>Belum diatur</span></div></div>
-  ${A.bentrok.length?`<div class="warn">⚠️ <span>OFF/cuti tapi tercantum di area kerja:</span> <b data-nt>${A.bentrok.map(e=>esc(dn(e))).join(', ')}</b></div>`:''}
-  <section class="card"><div class="h"><h3>Karyawan masuk</h3><span class="badge go">${A.total} orang</span></div>${rows||'<p class="mut" style="margin:0">Belum ada yang masuk. Atur shift atau area kerja di menu Pesan WA.</p>'}
+  return `<div class="stats"><div class="stat"><b>${A.total}</b><span>Hadir</span></div><div class="stat"><b>${A.off.length}</b><span>OFF</span></div><div class="stat"><b>${A.cuti.length}</b><span>Cuti / izin</span></div><div class="stat"><b>${A.belum.length}</b><span>Belum diatur</span></div></div>
+  <section class="card"><div class="h"><h3>Daftar hadir</h3><span class="badge go" data-nt>${esc(qtyL(A.total))}</span></div>${rows||'<p class="mut" style="margin:0">Belum ada yang hadir. Atur shift di menu Pesan WA atau Jadwal.</p>'}
    ${A.total?'':'<button class="btn pri" data-act="go" data-v="pesan" style="margin-top:10px">Atur shift</button>'}</section>
-  <section class="card"><h3>OFF</h3><div style="margin-top:8px">${nl(A.off)}</div><h4>CUTI / IZIN</h4>${nl(A.cuti.map(l=>emp(l.emp)))}<h4>BELUM DIATUR</h4>${nl(A.belum)}</section>
+  <section class="card"><h3>Tidak hadir</h3><h4>OFF</h4>${nl(A.off)}<h4>CUTI / IZIN</h4>${nl(A.cuti.map(l=>emp(l.emp)))}<h4>BELUM DIATUR</h4>${nl(A.belum)}</section>
   <section class="card"><div class="h"><h3>Pesan WhatsApp</h3></div><div style="margin-bottom:12px">${langSel()}</div><div id="out3"></div></section>`;
 }
+const qtyL=n=>LANG==='zh'?n+' 人':LANG==='dual'?n+' orang · '+n+' 人':n+' orang';
 function refreshMasuk(){
   const o=$('#out3');if(!o)return;const m=msg3(UI.date);
-  o.innerHTML=bubble('PESAN 3 · DAFTAR MASUK',m,'m3');
-  $('#quick').innerHTML=m?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(m)}">👷 Kirim Daftar Masuk</a>`:'';
+  o.innerHTML=bubble('PESAN 3 · DAFTAR HADIR',m,'m3');
+  $('#quick').innerHTML=m?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(m)}">👷 Kirim Daftar Hadir</a>`:'';
   trDom(o);trDom($('#quick'));
 }
 function bubble(title,text,id){
@@ -902,7 +910,7 @@ function bubble(title,text,id){
 }
 function refreshOutput(){
   const o=$('#out');if(!o)return;
-  o.innerHTML=bubble('PESAN 1 · JADWAL & SHIFT',msg1(UI.date),'m1')+bubble('PESAN 2 · PEMBAGIAN AREA',msg2(UI.date),'m2')+bubble('PESAN 3 · DAFTAR MASUK',msg3(UI.date),'m3')+`<button class="btn" data-act="copyall">Salin semua pesan</button>`;
+  o.innerHTML=bubble('PESAN 1 · JADWAL & SHIFT',msg1(UI.date),'m1')+bubble('PESAN 2 · PEMBAGIAN AREA',msg2(UI.date),'m2')+bubble('PESAN 3 · DAFTAR HADIR',msg3(UI.date),'m3')+`<button class="btn" data-act="copyall">Salin semua pesan</button>`;
   const s=$('#sug');if(s)s.textContent=suggest();
   const a1=msg1(UI.date),a2=msg2(UI.date);
   $('#quick').innerHTML=(a1?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(a1)}">💬 Kirim Pesan 1</a>`:'')+(a2?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(a2)}">📍 Kirim Pesan 2</a>`:'');
@@ -1012,14 +1020,14 @@ function vStat(){
 }
 
 /* ---------- render ---------- */
-function buildNav(){$('#nav').innerHTML=`<button data-act="tab" data-v="home">${ic('home')}<span>Beranda</span></button><button data-act="tab" data-v="jadwal">${ic('cal')}<span>Jadwal</span></button><span></span><button data-act="tab" data-v="cuti">${ic('doc')}<span>Cuti</span></button><button data-act="tab" data-v="emp">${ic('user')}<span>Karyawan</span></button><button class="fab" data-act="tab" data-v="pesan" aria-label="Pesan WhatsApp">${ic('send')}</button>`;}
+function buildNav(){const it=(v,i,l)=>`<button data-act="tab" data-v="${v}">${ic(i)}<span data-nt>${bil(l)}</span></button>`;$('#nav').innerHTML=it('home','home','Beranda')+it('jadwal','cal','Jadwal')+'<span></span>'+it('cuti','doc','Cuti')+it('emp','user','Karyawan')+`<button class="fab" data-act="tab" data-v="pesan" aria-label="Pesan WhatsApp">${ic('send')}</button>`}
 function render(){
   buildNav();document.documentElement.lang=LANG==='zh'?'zh-CN':'id';
   const y0=window.scrollY,t=UI.tab;
   const hd=$('#top');hd.className=t==='home'?'home':'';
   hd.innerHTML=t==='home'
-    ?`<div class="brandrow"><img class="logo" src="${LOGO}" alt="PT Sulawesi Recycling Technology"><div class="hdr-r">${syncHTML(false)}<button class="lang" data-act="lang" aria-label="Bahasa">${LANG==='zh'?'ID':'中文'}</button></div></div><div class="hello"><div><h1>Halo!!</h1><button class="nm" data-act="rename" data-nt>${esc(S.nama||'Admin')}<small>✎</small></button></div><div class="avatar" data-nt>${esc(initials(S.nama))}</div></div>`
-    :`<div class="bar"><button class="back" data-act="tab" data-v="home" aria-label="Kembali">‹</button><h2>${T(TITLE[t])}</h2>${syncHTML(true)}<button class="lang" data-act="lang" aria-label="Bahasa">${LANG==='zh'?'ID':'中文'}</button><img class="logo2" src="${LOGO}" alt=""></div>`+(['pesan','jadwal','stat','masuk'].includes(t)?`<div id="datebar"><button class="btn sm" data-act="prev" aria-label="Sebelumnya">‹</button><input type="date" id="dpick" value="${UI.date}"><button class="btn sm" data-act="next" aria-label="Berikutnya">›</button><button class="btn sm" data-act="today">Hari ini</button></div>`:'');
+    ?`<div class="brandrow"><img class="logo" src="${LOGO}" alt="PT Sulawesi Recycling Technology"><div class="hdr-r">${syncHTML(false)}<button class="lang" data-act="lang" aria-label="Bahasa">${LANG==='dual'?'ID·中':LANG==='zh'?'中文':'ID'}</button></div></div><div class="hello"><div><h1 data-nt>${LANG==='zh'?'你好！':LANG==='dual'?'Halo!! <small class="zhs" style="display:inline;font-size:.6em">你好</small>':'Halo!!'}</h1><button class="nm" data-act="rename" data-nt>${esc(S.nama||'Admin')}<small>✎</small></button></div><div class="avatar" data-nt>${esc(initials(S.nama))}</div></div>`
+    :`<div class="bar"><button class="back" data-act="tab" data-v="home" aria-label="Kembali">‹</button><h2 data-nt>${bil(TITLE[t])}</h2>${syncHTML(true)}<button class="lang" data-act="lang" aria-label="Bahasa">${LANG==='dual'?'ID·中':LANG==='zh'?'中文':'ID'}</button><img class="logo2" src="${LOGO}" alt=""></div>`+(['pesan','jadwal','stat','masuk'].includes(t)?`<div id="datebar"><button class="btn sm" data-act="prev" aria-label="Sebelumnya">‹</button><input type="date" id="dpick" value="${UI.date}"><button class="btn sm" data-act="next" aria-label="Berikutnya">›</button><button class="btn sm" data-act="today">Hari ini</button></div>`:'');
   document.querySelectorAll('#nav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===t));
   $('#view').innerHTML=({masuk:vMasuk,server:vServer,home:vHome,pesan:vPesan,jadwal:vJadwal,emp:vEmp,cuti:vCuti,stat:vStat})[t]();
   if(t==='pesan')refreshOutput();
@@ -1044,13 +1052,13 @@ document.addEventListener('click',async ev=>{
     if(!owner||!repo||!token){toast('Isi username, nama repo, dan token');return}
     b.disabled=true;b.textContent='Menghubungkan…';
     await ghConnect(owner,repo,branch,token);render()}
-  else if(a==='ghqr'){UI.qr=!UI.qr;clearInterval(UI.qrT);render();if(UI.qr){const end=Date.now()+120000;UI.qrT=setInterval(()=>{const l=Math.max(0,Math.round((end-Date.now())/1000)),el=$('#qrleft');if(el)el.textContent=Math.floor(l/60)+':'+String(l%60).padStart(2,'0');if(!l||!UI.qr||UI.tab!=='server'){clearInterval(UI.qrT);if(UI.qr){UI.qr=false;if(UI.tab==='server')render()}}},1000)}}
+  else if(a==='ghqr'){UI.qr=!UI.qr;clearInterval(UI.qrT);render();if(UI.qr){const end=Date.now()+120000;UI.qrT=setInterval(()=>{const l=Math.max(0,Math.round((end-Date.now())/1000));document.querySelectorAll('#qrleft,.qrleft').forEach(el=>{el.textContent=Math.floor(l/60)+':'+String(l%60).padStart(2,'0')});if(!l||!UI.qr||UI.tab!=='server'){clearInterval(UI.qrT);if(UI.qr){UI.qr=false;if(UI.tab==='server')render()}}},1000)}}
   else if(a==='ghcopylink'){if(await ask('Link ini berisi token akses data karyawan. Hanya buka di perangkat Anda sendiri dan jangan kirim ke orang lain. Salin?','Salin'))toast(await copyText(linkHubung())?'Link disalin ✓':'Gagal menyalin')}
   else if(a==='scanstart'){startScan()}
   else if(a==='scanclose'){stopScan()}
   else if(a==='ghsync'){if(!ready){initGH(false);return}if(localDirty)await flush();else await pollGH();toast(SYNC==='ok'?'Sudah sinkron ✓':SYNCMSG())}
   else if(a==='ghoff'){if(await ask('Putuskan server GitHub di perangkat ini? Data di repo tidak dihapus, dan data tetap ada di perangkat ini.','Putuskan')){ghDisconnect();render()}}
-  else if(a==='lang'){LANG=LANG==='zh'?'id':'zh';try{localStorage.setItem(LANGKEY,LANG)}catch(e){}render();toast(LANG==='zh'?'已切换为中文':'Bahasa Indonesia')}
+  else if(a==='lang'){LANG=LANG==='dual'?'id':LANG==='id'?'zh':'dual';try{localStorage.setItem(LANGKEY,LANG)}catch(e){}render();toast(LANG==='dual'?'Indonesia + 中文':LANG==='zh'?'中文':'Bahasa Indonesia')}
   else if(a==='zhauto'){const e=emp(ds.e);e.zh=zhName(e.nama);e.zhAuto=true;save();render()}
   else if(a==='zhall'){if(await ask('Buat ulang nama Mandarin semua karyawan secara otomatis? Nama yang sudah Anda ubah sendiri ikut diganti.','Buat ulang')){S.emps.forEach(e=>{e.zh=zhName(e.nama);e.zhAuto=true});save();render();toast('Nama Mandarin diperbarui')}}
   else if(a==='rename'){const v=await askText('Nama yang tampil di sapaan',S.nama);if(v!==null){S.nama=v.trim()||'Admin';save();render()}}
