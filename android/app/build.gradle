@@ -4,6 +4,7 @@ plugins {
 
 def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
 def ks = System.getenv("KS_FILE")
+def useReleaseKey = ks != null && new File(ks).exists()
 
 android {
     namespace 'com.slrt.aturkaryawan'
@@ -19,7 +20,7 @@ android {
 
     signingConfigs {
         release {
-            if (ks != null && file(ks).exists()) {
+            if (useReleaseKey) {
                 storeFile file(ks)
                 storePassword System.getenv("KS_PASS")
                 keyAlias System.getenv("KS_ALIAS")
@@ -31,7 +32,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig (ks != null && file(ks).exists()) ? signingConfigs.release : signingConfigs.debug
+            signingConfig = useReleaseKey ? signingConfigs.release : signingConfigs.debug
         }
     }
 
