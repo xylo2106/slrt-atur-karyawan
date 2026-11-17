@@ -66,6 +66,19 @@ Settings → Pages → *Deploy from a branch* → `main` / `(root)` → Save. Ap
 
 Repo app ini **public** supaya GitHub Pages bisa dipakai gratis. Isinya hanya kode dan logo, tanpa data karyawan maupun token. Data tetap di repo data yang **private**. Jangan pernah membuat repo data menjadi public.
 
+## APK Android
+
+Unduh di HP: **https://github.com/xylo2106/slrt-atur-karyawan/releases/latest/download/AturKaryawan-SLRT.apk**
+
+1. Buka link di atas di HP Android, unduh, lalu ketuk file APK-nya.
+2. Jika diminta, izinkan *Install unknown apps* untuk browser/File Manager.
+3. Buka **Atur Karyawan** → **Penyimpanan** → **📷 Scan QR dari perangkat yang sudah terhubung** → arahkan ke QR di laptop (*Penyimpanan → Hubungkan HP lain*).
+
+APK ini membuka app GitHub Pages di dalam WebView, jadi setiap update `index.html` langsung terpakai tanpa memasang APK baru.
+Link WhatsApp dan GitHub dibuka di aplikasinya masing-masing. APK baru dibangun otomatis (GitHub Actions → *Build APK*) hanya bila folder `android/` berubah.
+
+Selama secrets kunci belum diatur, APK ditandatangani dengan kunci debug. Memasang APK versi baru di atas versi lama mungkin perlu menghapus versi lama dulu. Data tetap aman di repo GitHub, tinggal hubungkan ulang lewat scan QR.
+
 ## Link claude.ai
 
 https://claude.ai/artifact/UF47P2MuEA26BF2Aw3HgGX

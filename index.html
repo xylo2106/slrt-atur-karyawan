@@ -44,7 +44,14 @@ button{font-family:inherit}
 .qrbox{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px;text-align:center;background:#fff}
 .qrbox svg{width:230px;max-width:100%;height:auto;display:block;margin:6px auto 10px;image-rendering:pixelated}
 .qrbox .warn2{background:#fff4e0;color:#7a4b00;border-radius:10px;padding:8px 10px;font-size:12.5px;text-align:left;margin-bottom:8px}
-.tok{display:flex;gap:6px}.tok input{flex:1}
+.tok{display:flex;gap:6px}
+#scanov{position:fixed;inset:0;z-index:40;background:#0b1530;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;color:#fff;text-align:center}
+#scanov .vw{position:relative;width:min(86vw,360px);aspect-ratio:1;border-radius:22px;overflow:hidden;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#scanov video{width:100%;height:100%;object-fit:cover}
+#scanov .fr{position:absolute;inset:14%;border:3px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.35)}
+#scanov .fr::after{content:"";position:absolute;left:8%;right:8%;height:2px;background:#ff4a58;box-shadow:0 0 10px #ff4a58;top:50%;animation:sl 1.8s ease-in-out infinite}
+@keyframes sl{0%,100%{top:12%}50%{top:88%}}
+#scanov p{margin:18px 0 14px;font-size:14.5px;max-width:320px;opacity:.9}.tok input{flex:1}
 code{background:var(--chip);border-radius:6px;padding:1px 6px;font-size:12.5px}
 .avatar,.av{display:grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;background:linear-gradient(135deg,#3a5bb0,#13295e);flex:none}
 .avatar{width:58px;height:58px;font-size:20px;box-shadow:0 6px 16px rgba(19,41,94,.35)}
@@ -420,12 +427,50 @@ async function ghLoadAll(){
 }
 const b64u=str=>b64e(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 function linkHubung(){return location.origin+location.pathname+'#hubung='+b64u(JSON.stringify({o:GHC.owner,r:GHC.repo,b:GHC.branch||'',t:GHC.token}))}
-function readHubung(){
-  const m=location.hash.match(/^#hubung=([A-Za-z0-9_-]+)/);if(!m)return null;
-  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){try{location.hash=''}catch(e2){}}   // hapus token dari alamat & riwayat
+function parseHubung(str){
+  const m=String(str||'').match(/#hubung=([A-Za-z0-9_-]+)/);if(!m)return null;
   let x=m[1].replace(/-/g,'+').replace(/_/g,'/');while(x.length%4)x+='=';
   try{const p=JSON.parse(b64d(x));if(p&&p.o&&p.r&&p.t)return p}catch(e){}
-  setTimeout(()=>toast('Link/QR penghubung tidak valid'),300);return null;
+  return null;
+}
+function readHubung(){
+  if(!/^#hubung=/.test(location.hash))return null;
+  const p=parseHubung(location.hash);
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){try{location.hash=''}catch(e2){}}   // hapus token dari alamat & riwayat
+  if(!p)setTimeout(()=>toast('Link/QR penghubung tidak valid'),300);
+  return p;
+}
+let scan=null;
+function loadJsQR(){return new Promise(res=>{if(window.jsQR)return res(true);const sc=document.createElement('script');sc.src='vendor/jsqr.min.js';sc.onload=()=>res(!!window.jsQR);sc.onerror=()=>res(false);document.head.appendChild(sc)})}
+function stopScan(){if(scan){scan.on=false;if(scan.stream)scan.stream.getTracks().forEach(t=>t.stop())}const o=$('#scanov');if(o)o.remove();scan=null}
+async function startScan(){
+  stopScan();
+  const ov=document.createElement('div');ov.id='scanov';
+  ov.innerHTML='<div class="vw"><video playsinline muted autoplay></video><div class="fr"></div></div><p>Arahkan kamera ke QR di layar perangkat yang sudah terhubung<br><small>(Penyimpanan → Hubungkan HP lain)</small></p><button class="btn" data-act="scanclose" style="min-width:140px">Batal</button>';
+  document.body.appendChild(ov);scan={on:true,stream:null};
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){stopScan();toast('Kamera tidak tersedia di sini');return}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})}
+  catch(e){stopScan();toast(e&&e.name==='NotAllowedError'?'Izin kamera ditolak. Izinkan kamera lalu coba lagi.':'Kamera tidak bisa dibuka.');return}
+  if(!scan){stream.getTracks().forEach(t=>t.stop());return}
+  scan.stream=stream;
+  const v=ov.querySelector('video');v.srcObject=stream;try{await v.play()}catch(e){}
+  let det=null;
+  if('BarcodeDetector' in window){try{const f=await BarcodeDetector.getSupportedFormats();if(f.includes('qr_code'))det=new BarcodeDetector({formats:['qr_code']})}catch(e){}}
+  if(!det&&!await loadJsQR()){stopScan();toast('Pemindai QR belum bisa dimuat. Periksa internet lalu coba lagi.');return}
+  const c=document.createElement('canvas'),cx=c.getContext('2d',{willReadFrequently:true});let bad='';
+  const tick=async()=>{
+    if(!scan||!scan.on)return;let txt=null;
+    try{
+      if(v.readyState>=2&&v.videoWidth){
+        if(det){const r=await det.detect(v);if(r&&r[0])txt=r[0].rawValue}
+        else{const w=v.videoWidth,h=v.videoHeight,k=Math.min(1,720/Math.max(w,h));c.width=w*k|0;c.height=h*k|0;cx.drawImage(v,0,0,c.width,c.height);const d=cx.getImageData(0,0,c.width,c.height);const r=jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});if(r)txt=r.data}
+      }
+    }catch(e){}
+    if(txt){const p=parseHubung(txt);if(p){stopScan();HUB=p;useHubung();return}if(txt!==bad){bad=txt;toast('Ini bukan QR penghubung Atur Karyawan')}}
+    setTimeout(tick,180);
+  };
+  tick();
 }
 let HUB=readHubung();
 async function useHubung(){
@@ -689,6 +734,8 @@ function vServer(){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" data-act="ghsync">Sinkronkan sekarang</button><a class="btn" target="_blank" rel="noopener" href="https://github.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/commits">Riwayat perubahan</a><button class="btn danger" data-act="ghoff">Putuskan</button></div></section>`;
   else gh=`<section class="card"><h3>Hubungkan server GitHub</h3>
     <p class="mut sm" style="margin:4px 0 6px">Data disimpan sebagai file di repo GitHub <b>private</b> milik Anda. Setiap perubahan tercatat sebagai riwayat (commit).</p>
+    <button class="btn pri" data-act="scanstart" style="width:100%;margin:6px 0 4px">📷 Scan QR dari perangkat yang sudah terhubung</button>
+    <p class="mut sm" style="margin:0 0 12px;text-align:center">Tanpa mengetik token. Kalau belum ada perangkat yang terhubung, ikuti langkah di bawah.</p>
     <ol class="steps">
      <li>Buat repo <b>private</b> baru untuk data, misalnya <code>slrt-atur-karyawan-data</code>, dan centang <i>Add a README file</i>. <a href="https://github.com/new" target="_blank" rel="noopener">Buat repo ›</a></li>
      <li>Buat token: <i>Fine-grained token</i> → <b>Repository access</b>: Only select repositories, pilih repo data → <b>Permissions</b>: Contents = <b>Read and write</b> → atur masa berlaku. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Buat token ›</a></li>
@@ -775,6 +822,8 @@ document.addEventListener('click',async ev=>{
     await ghConnect(owner,repo,branch,token);render()}
   else if(a==='ghqr'){UI.qr=!UI.qr;clearInterval(UI.qrT);render();if(UI.qr){const end=Date.now()+120000;UI.qrT=setInterval(()=>{const l=Math.max(0,Math.round((end-Date.now())/1000)),el=$('#qrleft');if(el)el.textContent=Math.floor(l/60)+':'+String(l%60).padStart(2,'0');if(!l||!UI.qr||UI.tab!=='server'){clearInterval(UI.qrT);if(UI.qr){UI.qr=false;if(UI.tab==='server')render()}}},1000)}}
   else if(a==='ghcopylink'){if(await ask('Link ini berisi token akses data karyawan. Hanya buka di perangkat Anda sendiri dan jangan kirim ke orang lain. Salin?','Salin'))toast(await copyText(linkHubung())?'Link disalin ✓':'Gagal menyalin')}
+  else if(a==='scanstart'){startScan()}
+  else if(a==='scanclose'){stopScan()}
   else if(a==='ghsync'){if(!ready){initGH(false);return}if(localDirty)await flush();else await pollGH();toast(SYNC==='ok'?'Sudah sinkron ✓':SYNCMSG())}
   else if(a==='ghoff'){if(await ask('Putuskan server GitHub di perangkat ini? Data di repo tidak dihapus, dan data tetap ada di perangkat ini.','Putuskan')){ghDisconnect();render()}}
   else if(a==='rename'){const v=await askText('Nama yang tampil di sapaan',S.nama);if(v!==null){S.nama=v.trim()||'Admin';save();render()}}

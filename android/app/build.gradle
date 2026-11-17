@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.application'
+}
+
+def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+def ks = System.getenv("KS_FILE")
+
+android {
+    namespace 'com.slrt.aturkaryawan'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.slrt.aturkaryawan'
+        minSdk 24
+        targetSdk 34
+        versionCode runNo
+        versionName "1.0." + runNo
+    }
+
+    signingConfigs {
+        release {
+            if (ks != null && file(ks).exists()) {
+                storeFile file(ks)
+                storePassword System.getenv("KS_PASS")
+                keyAlias System.getenv("KS_ALIAS")
+                keyPassword System.getenv("KS_PASS")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig (ks != null && file(ks).exists()) ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
