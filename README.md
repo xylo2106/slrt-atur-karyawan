@@ -46,11 +46,15 @@ Setiap simpan menjadi satu commit, jadi riwayat perubahan bisa dilihat dan dikem
    - Atur masa berlaku (misalnya 1 tahun). Saat habis, buat token baru dan hubungkan ulang.
 3. Buka app → **Penyimpanan** → isi username, nama repo data, tempel token → **Hubungkan**.
 
+**Menghubungkan HP tanpa mengetik token:** di perangkat yang sudah terhubung, buka **Penyimpanan → 📱 Hubungkan HP lain (scan QR)**. Scan QR dengan kamera HP lalu ketuk link yang muncul, dan HP langsung terhubung. QR tertutup otomatis setelah 2 menit. Token dihapus dari alamat browser begitu link dibuka.
+
+Di iPhone, kalau app dipasang ke Layar Utama (*Add to Home Screen*), hubungkan dari dalam ikon itu. iOS memisahkan penyimpanan Safari dan ikon Layar Utama.
+
 **Keamanan token**
 
 - Token hanya tersimpan di browser perangkat yang dipakai. Token tidak pernah masuk ke kode atau repo.
 - Token hanya bisa membaca/menulis repo data, tidak bisa menyentuh repo lain.
-- Jangan kirim token lewat chat atau WhatsApp.
+- Jangan kirim token, QR, atau link penghubung lewat chat atau WhatsApp. Isinya sama dengan token.
 - Kalau HP hilang: GitHub → Settings → Developer settings → Personal access tokens → hapus token itu.
 
 **Sinkron antar perangkat:** perubahan dikirim ±3 detik setelah berhenti mengetik. Perangkat lain mengambil perubahan saat app dibuka kembali, dan setiap 1 menit selama app terbuka. Jika dua perangkat mengubah bulan yang sama, perubahan pada tanggal berbeda digabung otomatis. Jika tanggal yang sama diubah di dua perangkat, simpanan terakhir yang dipakai.
