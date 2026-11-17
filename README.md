@@ -60,7 +60,7 @@ Setiap simpan menjadi satu commit, jadi riwayat perubahan bisa dilihat dan dikem
 Settings → Pages → *Deploy from a branch* → `main` / `(root)` → Save. App akan tersedia di
 `https://<username>.github.io/slrt-atur-karyawan/`.
 
-GitHub Pages untuk repo **private** butuh paket berbayar (GitHub Pro/Team). Dengan akun gratis, repo app ini perlu dibuat public. Itu aman karena repo app hanya berisi kode dan logo, tanpa data karyawan maupun token. Data tetap di repo data yang private.
+Repo app ini **public** supaya GitHub Pages bisa dipakai gratis. Isinya hanya kode dan logo, tanpa data karyawan maupun token. Data tetap di repo data yang **private**. Jangan pernah membuat repo data menjadi public.
 
 ## Link claude.ai
 
