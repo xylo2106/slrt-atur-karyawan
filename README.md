@@ -2,15 +2,18 @@
 
 Aplikasi web (satu file `index.html`) untuk mengatur karyawan dan membuat pesan WhatsApp harian:
 
-- **Pesan WA** – shift per karyawan, pembagian area kerja, piket, driver, nasi siang → 2 pesan siap kirim (gaya *Menarik* atau *Polos*).
-- **Jadwal** – tabel shift mingguan.
-- **Cuti & Izin** – pengajuan dengan status Berlangsung / Akan datang / Selesai.
-- **Karyawan** – input daftar sekaligus (`Nama, NIK` per baris), urutan, tanggal lahir, kode shift.
-- **Ringkasan** – sebaran shift (donat) dan rekap bulanan.
-- **Daftar Hadir** – karyawan shift (kode selain OFF) dan karyawan reguler (otomatis hadir di hari kerja, bisa ditandai OFF), tanpa yang cuti. Pesan WA hanya berisi nomor, nama panggilan, dan NIK.
-- **Dwibahasa** – tampilan dan pesan WA bawaan Indonesia + 中文 berdampingan; nama Mandarin dibuat dari nama panggilan.
-- **Beranda** – menu, timeline pengumuman, cuti, dan ulang tahun.
-- **Penyimpanan** – server GitHub, status sinkron, dan cadangan data.
+Tampilan bergaya Lark: tab bawah di HP, menu samping di layar lebar, daftar dan lembar pilihan (bottom sheet).
+
+- **Hari ini** – ringkasan hadir/OFF/cuti/belum diatur, shift hari ini, kirim 3 laporan WA, hal yang perlu perhatian (belum diatur, cuti selesai, ulang tahun), pengumuman.
+- **Jadwal** – tabel shift sebulan penuh; ketuk sel untuk memilih shift. *Isi dengan pola* (urutan berulang, mis. 4-4-4HM-4HM-OFF-OFF) untuk rentang tanggal dan regu tertentu, *Salin minggu lalu*, saring per regu.
+- **Kehadiran** – Hadir / OFF / Cuti / Belum diatur per hari, atur shift langsung, karyawan reguler (otomatis hadir di hari kerja, bisa ditandai OFF), nasi siang.
+- **Karyawan** – cari, saring Shift/Reguler/regu, profil per karyawan (data, nama Mandarin, regu, urutan, rekap bulan ini), tambah satu atau banyak sekaligus (`Nama, NIK` per baris).
+- **Pesan WA** – jadwal shift, pembagian area kerja (piket, driver), daftar hadir + nasi siang; gaya *Lengkap* atau *Polos*; bahasa Indonesia, 中文, atau keduanya.
+- **Cuti & izin** – Berlangsung / Akan datang / Selesai.
+- **Statistik** – rekap bulanan per karyawan dan per kode shift, unduh CSV (Excel) atau salin tabel.
+- **Pengaturan** – kode shift + keterangan jam, pola shift, regu, hari kerja reguler, bahasa tampilan.
+- **Dwibahasa** – tampilan Indonesia + 中文 berdampingan (bisa diganti ID saja atau 中文 saja); nama Mandarin dibuat dari nama panggilan.
+- **Penyimpanan** – server GitHub, status sinkron, hubungkan HP lain lewat QR, dan cadangan data.
 
 ## Penyimpanan data
 
