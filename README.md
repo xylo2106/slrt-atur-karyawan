@@ -4,16 +4,16 @@ Aplikasi web (satu file `index.html`) untuk mengatur karyawan dan membuat pesan 
 
 Tampilan bergaya Lark: tab bawah di HP, menu samping di layar lebar, daftar dan lembar pilihan (bottom sheet).
 
-- **Hari ini** – ringkasan hadir/OFF/cuti/belum diatur, shift hari ini, kirim 3 laporan WA, hal yang perlu perhatian (belum diatur, cuti selesai, ulang tahun), pengumuman.
+- **Beranda** – ringkasan hari ini (bar proporsi hadir/OFF/cuti/sakit/TK/belum diatur), perlu perhatian, shift hari ini, kirim 3 laporan WA, **statistik keseluruhan** periode berjalan (tingkat kehadiran, rata-rata hadir, jam lembur reguler, masuk libur, S/TK, grafik hadir per hari) dan **statistik pribadi** per karyawan (kalender periode), pengumuman.
 - **Jadwal** – tabel shift sebulan penuh; ketuk sel untuk memilih shift. *Isi dengan pola* (urutan berulang, mis. 4-4-4HM-4HM-OFF-OFF) untuk rentang tanggal dan regu tertentu, *Salin minggu lalu*, saring per regu.
 - **Kehadiran** – Hadir / OFF / Cuti / Belum diatur per hari, atur shift langsung, karyawan reguler (otomatis hadir di hari kerja, bisa ditandai OFF), nasi siang.
 - **Karyawan** – cari, saring Shift/Reguler/regu, profil per karyawan (data, nama Mandarin, regu, urutan, rekap bulan ini), tambah satu atau banyak sekaligus (`Nama, NIK` per baris).
-- **Pesan WA** – jadwal shift, pembagian area kerja (piket, driver), daftar hadir + nasi siang; gaya *Lengkap* atau *Polos*; bahasa Indonesia, 中文, atau keduanya.
+- **Pesan WA** – jadwal shift, pembagian area kerja (piket, driver), daftar hadir + nasi siang; gaya *Lengkap* atau *Polos*, tanpa emoticon; bahasa Indonesia, 中文, atau keduanya.
 - **Cuti & izin** – Berlangsung / Akan datang / Selesai.
-- **Statistik** – rekap bulanan per karyawan dan per kode shift, unduh CSV (Excel) atau salin tabel.
+- **Statistik & Excel** – periode tanggal 21–20 (bisa diganti bulan kalender), rekap per karyawan dan per kode; **Unduh Excel** (.xlsx) berisi tabel tanggal × karyawan berwarna, total per orang, jumlah hadir per hari, keterangan kode, dan lembar ringkasan.
 - **Hari libur & masuk hari libur** – daftar hari libur (libur nasional & cuti bersama SKB 3 Menteri 2026/2027 bisa ditambahkan sekali ketuk, atau libur perusahaan sendiri). Pada hari Minggu dan hari libur karyawan reguler otomatis libur; admin memilih siapa yang masuk (ketuk tanggal di Jadwal, atau kartu di Hari ini/Kehadiran). Karyawan reguler yang masuk diberi kode **HL**; karyawan shift yang masuk tetap memakai kode 4 / 4HM.
 - **Kode harian reguler** – Senin–Kamis dan Sabtu `1` jam lembur, Jumat `3` jam lembur, Minggu/libur `HL`; bisa diubah di Pengaturan atau per orang per hari. Kode tampil di pesan Jadwal shift (bagian Reguler).
-- **Tanda SKS / TK** – tandai karyawan sakit (SKS) atau tanpa keterangan (TK) per hari; tampil di jadwal, kehadiran, pesan WA, dan statistik.
+- **Tanda S / TK** – tandai karyawan sakit (S) atau tanpa keterangan (TK) per hari; tampil di jadwal, kehadiran, pesan WA, dan statistik.
 - **Pengaturan** – kode shift + keterangan jam, pola shift, regu, hari libur, hari kerja & kode reguler, bahasa tampilan.
 - **Dwibahasa** – tampilan Indonesia + 中文 berdampingan (bisa diganti ID saja atau 中文 saja); nama Mandarin dibuat dari nama panggilan.
 - **Penyimpanan** – server GitHub, status sinkron, hubungkan HP lain lewat QR, dan cadangan data.

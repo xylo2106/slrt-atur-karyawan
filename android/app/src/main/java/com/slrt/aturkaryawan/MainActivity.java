@@ -3,15 +3,21 @@ package com.slrt.aturkaryawan;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -20,6 +26,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 /**
  * Atur Karyawan – PT SLRT.
@@ -35,6 +45,7 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private PermissionRequest pendingPermission;
+    private volatile String currentUrl = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +76,13 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                currentUrl = url == null ? "" : url;
                 view.getSettings().setCacheMode(isOnline() ? WebSettings.LOAD_NO_CACHE : WebSettings.LOAD_CACHE_ELSE_NETWORK);
+            }
+
+            @Override
+            public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+                currentUrl = url == null ? "" : url;
             }
 
             @Override
@@ -96,10 +113,65 @@ public class MainActivity extends Activity {
             }
         });
 
+        web.addJavascriptInterface(new Bridge(), "AturAndroid");
+
         if (savedInstanceState != null) {
             web.restoreState(savedInstanceState);
         } else {
             web.loadUrl(startUrl(getIntent()));
+        }
+    }
+
+    /** Dipanggil dari halaman app untuk menyimpan file (mis. rekap Excel) ke folder Download. */
+    class Bridge {
+        @JavascriptInterface
+        public String saveFile(String name, String base64, String mime) {
+            try {
+                if (!isOwnPage(Uri.parse(currentUrl))) return "err:origin";
+                String safe = name == null ? "file" : name.replaceAll("[^A-Za-z0-9._ -]", "_");
+                if (!safe.matches("(?i).+\\.(xlsx|csv|pdf|txt)$")) return "err:type";
+                byte[] data = Base64.decode(base64, Base64.DEFAULT);
+                if (data.length == 0 || data.length > 25 * 1024 * 1024) return "err:size";
+                final String type = mime == null || mime.isEmpty() ? "application/octet-stream" : mime;
+                if (Build.VERSION.SDK_INT >= 29) {
+                    ContentValues v = new ContentValues();
+                    v.put(MediaStore.Downloads.DISPLAY_NAME, safe);
+                    v.put(MediaStore.Downloads.MIME_TYPE, type);
+                    v.put(MediaStore.Downloads.IS_PENDING, 1);
+                    final Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                    if (uri == null) return "err:insert";
+                    try (OutputStream os = getContentResolver().openOutputStream(uri)) {
+                        if (os == null) return "err:stream";
+                        os.write(data);
+                    }
+                    v.clear();
+                    v.put(MediaStore.Downloads.IS_PENDING, 0);
+                    getContentResolver().update(uri, v, null, null);
+                    runOnUiThread(() -> openSaved(uri, type, safe));
+                    return "ok:" + safe;
+                }
+                File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                if (dir == null) return "err:dir";
+                File f = new File(dir, safe);
+                try (FileOutputStream fo = new FileOutputStream(f)) { fo.write(data); }
+                final String path = f.getAbsolutePath();
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Tersimpan: " + path, Toast.LENGTH_LONG).show());
+                return "ok:" + path;
+            } catch (Exception e) {
+                return "err:" + e.getClass().getSimpleName();
+            }
+        }
+    }
+
+    private void openSaved(Uri uri, String type, String name) {
+        Toast.makeText(this, "Tersimpan di folder Download: " + name, Toast.LENGTH_LONG).show();
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, type);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Pasang aplikasi Excel / Google Sheets / WPS untuk membuka file ini", Toast.LENGTH_LONG).show();
         }
     }
 
