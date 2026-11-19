@@ -11,7 +11,10 @@ Tampilan bergaya Lark: tab bawah di HP, menu samping di layar lebar, daftar dan 
 - **Pesan WA** – jadwal shift, pembagian area kerja (piket, driver), daftar hadir + nasi siang; gaya *Lengkap* atau *Polos*; bahasa Indonesia, 中文, atau keduanya.
 - **Cuti & izin** – Berlangsung / Akan datang / Selesai.
 - **Statistik** – rekap bulanan per karyawan dan per kode shift, unduh CSV (Excel) atau salin tabel.
-- **Pengaturan** – kode shift + keterangan jam, pola shift, regu, hari kerja reguler, bahasa tampilan.
+- **Hari libur & masuk hari libur** – daftar hari libur (libur nasional & cuti bersama SKB 3 Menteri 2026/2027 bisa ditambahkan sekali ketuk, atau libur perusahaan sendiri). Pada hari Minggu dan hari libur karyawan reguler otomatis libur; admin memilih siapa yang masuk (ketuk tanggal di Jadwal, atau kartu di Hari ini/Kehadiran). Yang masuk diberi kode **HL**.
+- **Kode harian reguler** – Senin–Kamis dan Sabtu `1`, Jumat `3` (jam lembur), Minggu/libur `HL`; bisa diubah di Pengaturan atau per orang per hari. Kode tampil di pesan Jadwal shift (bagian Reguler).
+- **Tanda SKS / TK** – tandai karyawan sakit (SKS) atau tanpa keterangan (TK) per hari; tampil di jadwal, kehadiran, pesan WA, dan statistik.
+- **Pengaturan** – kode shift + keterangan jam, pola shift, regu, hari libur, hari kerja & kode reguler, bahasa tampilan.
 - **Dwibahasa** – tampilan Indonesia + 中文 berdampingan (bisa diganti ID saja atau 中文 saja); nama Mandarin dibuat dari nama panggilan.
 - **Penyimpanan** – server GitHub, status sinkron, hubungkan HP lain lewat QR, dan cadangan data.
 
