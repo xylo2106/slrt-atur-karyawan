@@ -10,7 +10,10 @@ Tampilan bergaya Lark: tab bawah di HP, menu samping di layar lebar, daftar dan 
 - **Karyawan** – cari, saring Shift/Reguler/regu, profil per karyawan (data, nama Mandarin, regu, urutan, rekap bulan ini), tambah satu atau banyak sekaligus (`Nama, NIK` per baris).
 - **Pesan WA** – jadwal shift, pembagian area kerja (piket, driver), daftar hadir + nasi siang; gaya *Lengkap* atau *Polos*, tanpa emoticon; bahasa Indonesia, 中文, atau keduanya.
 - **Cuti & izin** – Berlangsung / Akan datang / Selesai.
-- **Statistik & Excel** – periode tanggal 21–20 yang diberi nama menurut bulan awalnya (Periode Oktober = 21 Oktober – 20 November; bisa diganti bulan kalender), rekap per karyawan dan per kode; **Unduh Excel** (.xlsx) berisi tabel tanggal × karyawan berwarna, total per orang, jumlah hadir per hari, keterangan kode, dan lembar ringkasan.
+- **Statistik** – diagram persentase per periode tanggal 21–20 (Periode Oktober = 21 Oktober – 20 November; bisa diganti bulan kalender).
+- **Excel absensi** – **Unduh Excel** menghasilkan lembar `考勤报表absensi` sesuai format *ABSENSI KARYAWAN SLRT* (kop Departemen/Periode/Jumlah, kolom No, Nama, NIK, Departemen, Unit Kerja, Posisi, Jadwal, kode per tanggal, Tanda Tangan, Dibuat oleh / Kepala Devisi) plus lembar Ringkasan.
+- **Impor dari Excel** – Karyawan → + → Dari Excel: baca file absensi format yang sama (nama, NIK, departemen, posisi, jadwal, kode harian 1/3/OFF/HL/NEW/S/TK/cuti).
+- **Karyawan baru (NEW)** – isi *Mulai kerja* di profil; tanggal itu berkode NEW dan hari sebelumnya tidak dihitung.
 - **Hari libur & masuk hari libur** – daftar hari libur (libur nasional & cuti bersama SKB 3 Menteri 2026/2027 bisa ditambahkan sekali ketuk, atau libur perusahaan sendiri). Pada hari Minggu dan hari libur karyawan reguler otomatis libur; admin memilih siapa yang masuk (ketuk tanggal di Jadwal, atau kartu di Hari ini/Kehadiran). Karyawan reguler yang masuk diberi kode **HL**; karyawan shift yang masuk tetap memakai kode 4 / 4HM.
 - **Kode harian reguler** – Senin–Kamis dan Sabtu `1` jam lembur, Jumat `3` jam lembur, Minggu/libur `HL`; bisa diubah di Pengaturan atau per orang per hari. Kode tampil di pesan Jadwal shift (bagian Reguler).
 - **Tanda S / TK** – tandai karyawan sakit (S) atau tanpa keterangan (TK) per hari; tampil di jadwal, kehadiran, pesan WA, dan statistik.
