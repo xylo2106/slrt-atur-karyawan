@@ -7,6 +7,11 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <queries>
+        <package android:name="com.tencent.mm" />
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />

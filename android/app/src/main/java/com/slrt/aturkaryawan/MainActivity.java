@@ -161,7 +161,44 @@ public class MainActivity extends Activity {
                 return "err:" + e.getClass().getSimpleName();
             }
         }
+
+        /** Kirim teks pesan ke WeChat ("Kirim ke teman"). Teks juga sudah disalin oleh halaman. */
+        @JavascriptInterface
+        public String shareWeChat(String text) {
+            if (!isOwnPage(Uri.parse(currentUrl))) return "err:origin";
+            if (text == null || text.isEmpty() || text.length() > 20000) return "err:text";
+            final String t = text;
+            PackageManager pm = getPackageManager();
+            try { pm.getPackageInfo(WX, 0); } catch (Exception e) { return "nowx"; }
+            runOnUiThread(() -> {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_TEXT, t);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    i.setClassName(WX, WX + ".ui.tools.ShareImgUI");
+                    startActivity(i);
+                    return;
+                } catch (Exception ignored) { }
+                try {
+                    i.setComponent(null);
+                    i.setPackage(WX);
+                    startActivity(i);
+                    return;
+                } catch (Exception ignored) { }
+                try {
+                    Intent l = getPackageManager().getLaunchIntentForPackage(WX);
+                    if (l != null) {
+                        startActivity(l);
+                        Toast.makeText(MainActivity.this, "Pesan sudah disalin, tempel di obrolan WeChat", Toast.LENGTH_LONG).show();
+                    }
+                } catch (Exception ignored) { }
+            });
+            return "ok";
+        }
     }
+
+    private static final String WX = "com.tencent.mm";
 
     private void openSaved(Uri uri, String type, String name) {
         Toast.makeText(this, "Tersimpan di folder Download: " + name, Toast.LENGTH_LONG).show();

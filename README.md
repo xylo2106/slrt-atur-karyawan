@@ -70,6 +70,8 @@ Di iPhone, kalau app dipasang ke Layar Utama (*Add to Home Screen*), hubungkan d
 
 **Sinkron antar perangkat:** perubahan dikirim ±3 detik setelah berhenti mengetik. Perangkat lain mengambil perubahan saat app dibuka kembali, dan setiap 1 menit selama app terbuka. Jika dua perangkat mengubah bulan yang sama, perubahan pada tanggal berbeda digabung otomatis. Jika tanggal yang sama diubah di dua perangkat, simpanan terakhir yang dipakai.
 
+- **Kirim ke WeChat** — setiap pesan (jadwal shift, area kerja, daftar hadir) bisa dikirim ke WhatsApp atau WeChat. Pesan WeChat memakai bahasa sendiri (bawaan 中文, bisa diubah di Pesan → Format pesan) dan tanpa tanda bintang. Di APK tombol WeChat langsung membuka "Kirim ke teman" di WeChat; di laptop teks disalin untuk ditempel.
+
 ## Menjalankan dari GitHub Pages
 
 Settings → Pages → *Deploy from a branch* → `main` / `(root)` → Save. App akan tersedia di
