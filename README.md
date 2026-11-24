@@ -71,7 +71,7 @@ Di iPhone, kalau app dipasang ke Layar Utama (*Add to Home Screen*), hubungkan d
 **Sinkron antar perangkat:** perubahan dikirim ±3 detik setelah berhenti mengetik. Perangkat lain mengambil perubahan saat app dibuka kembali, dan setiap 1 menit selama app terbuka. Jika dua perangkat mengubah bulan yang sama, perubahan pada tanggal berbeda digabung otomatis. Jika tanggal yang sama diubah di dua perangkat, simpanan terakhir yang dipakai.
 
 - **Kirim ke WeChat** — setiap pesan (jadwal shift, area kerja, daftar hadir) bisa dikirim ke WhatsApp atau WeChat. Pesan WeChat memakai bahasa sendiri (bawaan 中文, bisa diubah di Pesan → Format pesan) dan tanpa tanda bintang. Di APK tombol WeChat langsung membuka "Kirim ke teman" di WeChat; di laptop teks disalin untuk ditempel.
-- **Pekerja China di area kerja** — daftar pekerja China (nama 中文, pinyin, jabatan) diatur di Pengaturan → Pekerja China. Di Pesan → Area kerja tiap area punya baris Indonesia dan China; di pesan, nama China tampil di samping pekerja Indonesia (`A1 | Akmal, Afdal | 刘鹏, 马朋毅`). Pesan bahasa Indonesia memakai pinyin, Mandarin memakai 汉字, dua bahasa memakai keduanya.
+- **Pendamping China di area kerja** — daftar pendamping China (nama 中文, pinyin, jabatan) diatur di Pengaturan → Pendamping China. Pendamping bukan karyawan: tidak masuk daftar karyawan, jadwal, maupun absensi. Di Pesan → Area kerja tiap area punya baris Indonesia dan Pendamping; di pesan, nama pendamping tampil di samping pekerja Indonesia (`A1 | Akmal, Afdal | 刘鹏, 马朋毅`). Nama China yang terlanjur dimasukkan sebagai karyawan terdeteksi dan bisa dipindahkan dengan satu ketukan. Pesan bahasa Indonesia memakai pinyin, Mandarin memakai 汉字, dua bahasa memakai keduanya.
 
 ## Menjalankan dari GitHub Pages
 
