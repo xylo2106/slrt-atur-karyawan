@@ -1,4 +1,6 @@
-# Atur Karyawan – PT SLRT
+# Fei Fei Sibuk – PT SLRT
+
+_(dulu bernama Atur Karyawan)_
 
 Aplikasi web (satu file `index.html`) untuk mengatur karyawan dan membuat pesan WhatsApp harian:
 
@@ -82,11 +84,11 @@ Repo app ini **public** supaya GitHub Pages bisa dipakai gratis. Isinya hanya ko
 
 ## APK Android
 
-Unduh di HP: **https://github.com/xylo2106/slrt-atur-karyawan/releases/latest/download/AturKaryawan-SLRT.apk**
+Unduh di HP: **https://github.com/xylo2106/slrt-atur-karyawan/releases/latest/download/FeiFeiSibuk.apk**
 
 1. Buka link di atas di HP Android, unduh, lalu ketuk file APK-nya.
 2. Jika diminta, izinkan *Install unknown apps* untuk browser/File Manager.
-3. Buka **Atur Karyawan** → **Penyimpanan** → **📷 Scan QR dari perangkat yang sudah terhubung** → arahkan ke QR di laptop (*Penyimpanan → Hubungkan HP lain*).
+3. Buka **Fei Fei Sibuk** → **Penyimpanan** → **📷 Scan QR dari perangkat yang sudah terhubung** → arahkan ke QR di laptop (*Penyimpanan → Hubungkan HP lain*).
 
 APK ini membuka app GitHub Pages di dalam WebView, jadi setiap update `index.html` langsung terpakai tanpa memasang APK baru.
 Link WhatsApp dan GitHub dibuka di aplikasinya masing-masing. APK baru dibangun otomatis (GitHub Actions → *Build APK*) hanya bila folder `android/` berubah.

@@ -47,14 +47,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk AturKaryawan-SLRT.apk
-          ls -la AturKaryawan-SLRT.apk
-          gh release create "apk-v${{ github.run_number }}" AturKaryawan-SLRT.apk \
-            --title "Atur Karyawan APK v1.0.${{ github.run_number }}" \
-            --notes "APK Android untuk app Atur Karyawan PT SLRT. Unduh AturKaryawan-SLRT.apk lalu pasang di HP. Isi app selalu mengikuti versi terbaru di GitHub Pages." \
+          cp android/app/build/outputs/apk/release/app-release.apk FeiFeiSibuk.apk
+          ls -la FeiFeiSibuk.apk
+          gh release create "apk-v${{ github.run_number }}" FeiFeiSibuk.apk \
+            --title "Fei Fei Sibuk APK v1.0.${{ github.run_number }}" \
+            --notes "APK Android Fei Fei Sibuk (dulu Atur Karyawan) PT SLRT. Unduh FeiFeiSibuk.apk lalu pasang di HP. Isi app selalu mengikuti versi terbaru di GitHub Pages." \
             --latest
 
       - uses: actions/upload-artifact@v4
         with:
-          name: AturKaryawan-SLRT-apk
-          path: AturKaryawan-SLRT.apk
+          name: FeiFeiSibuk-apk
+          path: FeiFeiSibuk.apk

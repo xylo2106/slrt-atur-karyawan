@@ -32,7 +32,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 /**
- * Atur Karyawan – PT SLRT.
+ * Fei Fei Sibuk (dulu Atur Karyawan) – PT SLRT.
  * Membungkus app GitHub Pages dalam WebView, jadi setiap update app langsung terpakai
  * tanpa memasang APK baru. Data & token tersimpan di penyimpanan WebView milik APK ini.
  */
