@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta name="build" content="0153e217de">
+<meta name="build" content="ad052bf68f">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
@@ -442,6 +442,98 @@ table.g td.na{background:repeating-linear-gradient(135deg,#fff 0 5px,#F5F6F7 5px
 .strayc .stx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--t2)}.strayc .stx b{color:var(--t1);font-size:14px;font-weight:600}.strayc .nl{color:var(--t3);font-size:12px}
 .card>.strayc:only-child{margin:12px 16px}
 .strayc{flex-direction:column;align-items:stretch}.strayc .btn{align-self:flex-start;height:32px;padding:0 14px;font-size:13px}.strayc .btn .zt{display:inline;margin-left:4px}
+
+/* ======== gerak & sentuhan ======== */
+:root{--eo:cubic-bezier(.2,.8,.2,1);--spr:cubic-bezier(.34,1.45,.64,1);--shc:cubic-bezier(.32,.72,0,1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pushIn{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
+@keyframes nextIn{from{opacity:.15;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes prevIn{from{opacity:.15;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes reveal{from{clip-path:inset(0 100% 0 0 round 5px)}to{clip-path:inset(0 0 0 0 round 5px)}}
+@keyframes dash{from{stroke-dasharray:0 400}}
+@keyframes pop{0%{transform:scale(.82)}55%{transform:scale(1.14)}100%{transform:none}}
+@keyframes uline{from{transform:scaleX(0)}}
+@keyframes qup{from{transform:translateY(100%);opacity:0}}
+@keyframes ring{from{transform:scale(.6);opacity:0}}
+
+#view.v-rise .an{animation:rise .46s var(--eo) both;animation-delay:calc(var(--i,0)*42ms)}
+#view.v-push .an{animation:pushIn .36s var(--eo) both;animation-delay:calc(var(--i,0)*22ms)}
+#view.v-pop .an{animation:popIn .34s var(--eo) both}
+#view.v-next .an-d{animation:nextIn .32s var(--eo) both}
+#view.v-prev .an-d{animation:prevIn .32s var(--eo) both}
+#view.v-fade .an-d{animation:fadeUp .28s var(--eo) both}
+#view.v-rise .an .pbar,#view.v-push .an .pbar,#view .an-d .pbar{animation:reveal .8s var(--eo) .12s both}
+#view.v-rise .an .pbar.sm{animation-delay:calc(.15s + var(--j,0)*30ms)}
+#view.v-rise .an svg.dn circle,#view.v-push .an svg.dn circle,#view .an-d svg.dn circle{animation:dash 1s var(--eo) .1s both}
+#view.v-fade .utabs button.on::after,#view.v-rise .utabs button.on::after{animation:uline .3s var(--eo) both}
+
+/* tekan */
+.btn,.fc,.chip,.chipadd,.cnp,.lgi,.ib,.tdy,.st,.opt,.sw,.wks button,#tabs button{transition:transform .14s var(--eo),background-color .15s,border-color .15s,color .15s,box-shadow .15s}
+.btn:active,.tdy:active{transform:scale(.965)}
+.fc:active,.chip:active,.chipadd:active,.lgi:active{transform:scale(.95)}
+.ib:active{transform:scale(.9)}
+.li[data-act]{transition:background-color .15s}
+.cnp:active,.opt:active{background:var(--bg)}
+.sw::after{transition:left .28s var(--spr),width .2s}
+.sw:active::after{width:24px}.sw.on:active::after{left:16px}
+
+/* bilah atas */
+#bar{transition:box-shadow .2s,border-color .2s}
+#bar.sc{box-shadow:0 2px 14px rgba(31,35,41,.07);border-bottom-color:transparent}
+
+/* tab bawah dengan pil aktif */
+#tabs{box-shadow:0 -1px 0 var(--div);border-top:0}
+#tabs button{gap:2px}
+#tabs .ti{position:relative;display:grid;place-items:center;width:54px;height:28px;border-radius:14px}
+#tabs .ti::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--blue-l);opacity:0;transform:scaleX(.45);transition:transform .38s var(--spr),opacity .2s}
+#tabs button.on .ti::before{opacity:1;transform:none}
+#tabs .ti svg.i{position:relative}
+#tabs button.just .ti svg.i{animation:pop .42s var(--spr)}
+#tabs button:active .ti{transform:scale(.92);transition:transform .12s}
+#tabs .ti{transition:transform .2s var(--spr)}
+@media(min-width:900px){#tabs .ti{width:auto;height:auto}#tabs .ti::before{display:none}}
+
+/* strip minggu */
+.dsw.wkon{border-bottom:0;padding-bottom:0}
+.wks{position:relative;display:grid;grid-template-columns:repeat(7,1fr);padding:0 10px 8px;background:#fff;border-bottom:1px solid var(--div);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.wks button{position:relative;z-index:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0 0;cursor:pointer;font:inherit;color:var(--t3)}
+.wks .wd{font-size:11px;line-height:14px;letter-spacing:.2px}
+.wks .wn{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;transition:color .25s}
+.wks .lb .wn{color:var(--red)}
+.wks .td .wn{color:var(--blue);font-weight:600}
+.wks .td:not(.on) .wn::after{content:"";position:absolute;bottom:-1px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--blue)}
+.wks .wn{position:relative}
+.wks .on .wn{color:#fff;font-weight:600}
+.wks .on .wd{color:var(--blue);font-weight:500}
+.wks .pill{position:absolute;z-index:0;top:21px;left:calc(10px + (100% - 20px) / 7 * (var(--k) + .5) - 17px);width:34px;height:34px;border-radius:50%;background:var(--blue);box-shadow:0 3px 10px rgba(51,112,255,.32);transition:left .42s var(--spr)}
+.wks .lb.on~.pill,.wks:has(.lb.on) .pill{background:var(--red);box-shadow:0 3px 10px rgba(245,74,69,.3)}
+.wks button:active .wn{transform:scale(.9)}
+.wks .wn{transition:color .25s,transform .15s var(--eo)}
+
+/* lembar bawah: pegas & tarik */
+@media(max-width:899px){
+ #sheet{transition:transform .42s var(--shc);will-change:transform;box-shadow:0 -6px 30px rgba(31,35,41,.12)}
+ #sheetbg{transition:opacity .3s}
+ .grab{width:40px;height:5px;border-radius:3px;margin:8px auto 2px;position:relative}
+ .grab::after{content:"";position:absolute;left:-40px;right:-40px;top:-10px;bottom:-12px}
+}
+
+/* toast & bilah cepat */
+#toast{transform:translate(-50%,-10px) scale(.96);transition:opacity .2s,transform .38s var(--spr)}
+#toast.on{transform:translate(-50%,0) scale(1)}
+#quick.on{animation:qup .34s var(--eo)}
+
+/* kartu sedikit lebih hidup */
+.card{box-shadow:0 1px 2px rgba(31,35,41,.04)}
+.lic{transition:transform .2s var(--spr)}
+.li[data-act]:active .lic{transform:scale(.92)}
+
+@media (prefers-reduced-motion: reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media(min-width:900px){.wks{display:none}.dsw.wkon{border-bottom:1px solid var(--div);padding-bottom:6px}}
 </style>
 </head>
 <body>
@@ -1144,7 +1236,7 @@ function parseBulk(txt){
 function suggest(){return attendance(UI.date).total}
 const MSG={m1:()=>msg1(UI.date),m2:()=>msg2(UI.date),m3:()=>msg3(UI.date)};
 
-const BUILD='0153e217de',BUILDT='2026-11-25T14:21Z';
+const BUILD='ad052bf68f',BUILDT='2026-11-25T14:31Z';
 /* ---------- ui helpers ---------- */
 /* ---------- terjemahan tampilan baru ---------- */
 Object.assign(ZH,{'Pendamping China':'中方陪同人员','Pendamping':'中方陪同','Tambah pendamping China':'添加中方陪同人员','Ubah pendamping':'编辑陪同人员','Pindahkan':'移动','nama China ada di daftar karyawan':'个中文姓名在员工名单中','Mereka ikut jadwal dan absensi. Pindahkan ke daftar pendamping supaya tidak ikut absen.':'他们会被计入排班和考勤。移到陪同人员名单后将不再计入考勤。','Ketuk nama untuk menambah atau melepas. Nama pendamping tampil di samping pekerja Indonesia di pesan Area kerja. Pendamping tidak masuk daftar karyawan maupun absensi.':'点击姓名添加或移除。陪同人员显示在工作区域消息中印尼员工的旁边，不计入员工名单和考勤。','Belum ada daftar pendamping China. Tambahkan dulu, cukup sekali.':'暂无中方陪同人员名单，请先添加（只需一次）。','Bukan karyawan: tidak masuk daftar karyawan, jadwal, maupun absensi. Hanya dipilih di Pesan → Area kerja sebagai pendamping, dan tampil di samping pekerja Indonesia.':'不是员工：不计入员工名单、排班和考勤。仅在 消息 → 工作区域 中作为陪同人员选择，显示在印尼员工旁边。','Versi app':'应用版本','Periksa':'检查','Memeriksa pembaruan…':'正在检查更新…','Sudah versi terbaru':'已是最新版本','Gagal memeriksa pembaruan':'检查更新失败','Versi baru tersedia · ketuk untuk memuat ulang':'有新版本 · 点击重新加载','Pekerja China':'中方人员','Tambah pekerja China':'添加中方人员','Ubah pekerja China':'编辑中方人员','Nama latin / pinyin':'拼音 / 拉丁名','Jabatan':'职务','Atau tempel banyak sekaligus':'或一次粘贴多人','Satu baris satu orang: nama 中文, pinyin, jabatan. Pinyin dan jabatan boleh kosong.':'每行一人：中文名、拼音、职务。拼音和职务可留空。','Ketuk nama untuk menambah atau melepas. Nama pendamping tampil di samping pekerja Indonesia di pesan Area kerja. Pendamping tidak masuk daftar karyawan maupun absensi.':'点击姓名添加或移除。中方人员会显示在工作区域消息中印尼员工的旁边。','Belum ada daftar pendamping China. Tambahkan dulu, cukup sekali.':'暂无中方人员名单，请先添加（只需一次）。','Bukan karyawan: tidak masuk daftar karyawan, jadwal, maupun absensi. Hanya dipilih di Pesan → Area kerja sebagai pendamping, dan tampil di samping pekerja Indonesia.':'在 消息 → 工作区域 中选择。中方人员显示在各区域印尼员工的旁边。','Selesai':'完成','Indonesia':'印尼','China':'中方','Tidak ada nama 中文 yang terbaca':'未读取到中文姓名','Isi nama 中文 dulu':'请先填写中文名','Nama ini sudah ada':'该姓名已存在','Disimpan':'已保存','Pesan WA & WeChat':'WA 与微信消息','Bahasa pesan WeChat':'微信消息语言','Sama dengan WA':'与 WA 相同','WeChat belum terpasang di HP ini. Pesan sudah disalin.':'此手机未安装微信，消息已复制。','Pesan disalin. Buka WeChat lalu tempel.':'消息已复制，请打开微信粘贴。','Pesan disalin. Buka WeChat lalu tempel. (Perbarui APK agar bisa langsung ke WeChat)':'消息已复制，请打开微信粘贴。（更新 APK 后可直接发送到微信）','Link impor tidak valid':'导入链接无效','Masukkan':'导入','— pilih —':'— 请选择 —','+ Posisi baru…':'+ 新岗位…','+ Departemen baru…':'+ 新部门…','Posisi & departemen':'岗位与部门','Tambah posisi':'添加岗位','Tambah departemen':'添加部门','Bawaan':'默认','Jadikan bawaan':'设为默认','Posisi semua':'全部岗位','Departemen semua':'全部部门','Muncul sebagai pilihan di profil karyawan dan di Excel absensi (kolom Posisi bisa dipilih dari daftar).':'作为员工资料和考勤 Excel 中的选项（岗位列可从列表中选择）。','Nama posisi (Indonesia), mis. Teknisi Mekanik':'岗位名称（印尼语），例如 Teknisi Mekanik','Nama posisi dalam 中文 (boleh kosong), mis. 机修工':'岗位中文名称（可留空），例如 机修工','Nama departemen (Indonesia)':'部门名称（印尼语）','Nama departemen dalam 中文 (boleh kosong)':'部门中文名称（可留空）','Tanpa ket. (TK)':'缺勤 (TK)','Hanya hari hadir, sakit (S), dan tanpa keterangan (TK) yang dihitung. OFF, libur, dan cuti tidak dimasukkan.':'仅统计出勤、病假 (S) 和无故缺勤 (TK) 天数，不含 OFF、假日和休假。','Persentase kehadiran':'出勤百分比','Angka di kanan = persentase hadir tiap karyawan (hadir dibanding hadir + sakit + TK). Ketuk bar untuk melihat persentase tiap bagian.':'右侧数字为各员工的出勤百分比（出勤 ÷（出勤 + 病假 + 缺勤））。点击条形可查看各部分百分比。','Cuti Tahunan':'年假','Cuti Family Visit':'探亲假','Dari Excel':'从 Excel','Impor juga kode harian':'同时导入每日代码','Karyawan dicocokkan lewat NIK. Data karyawan (nama, departemen, posisi, jadwal) diperbarui. Kode harian (1, 3, OFF, HL, NEW, S, TK, cuti) menimpa jadwal di tanggal tersebut.':'按工号匹配员工，并更新员工资料（姓名、部门、岗位、班制）。每日代码（1、3、OFF、HL、NEW、S、TK、休假）会覆盖对应日期的排班。','Pilih file lain':'选择其他文件','Impor':'导入','Pilih file Excel absensi (format ABSENSI KARYAWAN SLRT). Nama, NIK, departemen, posisi, jadwal, dan kode harian dibaca otomatis.':'选择考勤 Excel 文件（ABSENSI KARYAWAN SLRT 格式），自动读取姓名、工号、部门、岗位、班制和每日代码。','Pilih file .xlsx':'选择 .xlsx 文件','Format absensi tidak dikenali di file ini':'无法识别此文件的考勤格式','Laporan absensi (Excel)':'考勤报表（Excel）','Judul':'标题','Departemen di kop':'表头部门','Departemen karyawan':'员工部门','Dibuat oleh':'编制','Kepala divisi':'部门负责人','Isi "OK" di tanda tangan':'签字栏填写 "OK"','Dipakai di file Excel absensi. Departemen, posisi, dan tanggal mulai kerja tiap karyawan diisi di profil karyawan, atau otomatis lewat Impor dari Excel.':'用于考勤 Excel 文件。各员工的部门、岗位和入职日期可在员工资料中填写，或通过从 Excel 导入自动填写。','Departemen':'部门','Unit kerja':'二级部门','Posisi':'岗位','Mulai kerja':'入职日期','Hari pertama kerja (karyawan baru)':'入职第一天（新员工）','Belum bekerja':'尚未入职','Komposisi hari kerja':'工作日构成','Hadir dibanding hari yang seharusnya masuk (tanpa OFF, libur, dan cuti).':'出勤天数占应出勤天数的比例（不含 OFF、假日和休假）。','Kode hadir':'出勤代码','Persentase dari seluruh hari hadir.':'占全部出勤天数的百分比。','Kehadiran per karyawan':'各员工出勤','Angka di kanan = tingkat kehadiran tiap karyawan. Ketuk bar untuk melihat persentase tiap bagian.':'右侧数字为各员工出勤率。点击条形可查看各部分百分比。','Angka lengkap':'完整数据','Jumlah hari, jam lembur, HL, cuti, S, dan TK per karyawan ada di file Excel.':'各员工的天数、加班小时、HL、休假、S 和 TK 都在 Excel 文件中。','Periode ini belum dimulai':'本周期尚未开始','Unduh Excel':'下载 Excel','Periode ini':'本周期','Bisa juga tempel pesan WA lama (Jadwal shift atau Daftar hadir). Nama dan NIK diambil otomatis.':'也可以粘贴以前的 WA 消息（排班表或出勤名单），系统会自动读取姓名和工号。','Hubungkan HP lain':'连接其他手机','Tampilkan QR di sini, lalu scan dari HP yang baru':'在此显示二维码，然后用新手机扫描','Tampilkan QR':'显示二维码','Sembunyikan QR':'隐藏二维码','Scan QR':'扫描二维码','Di perangkat itu buka Lainnya → Penyimpanan → Tampilkan QR':'在该设备上打开 更多 → 存储 → 显示二维码','Data hanya tersimpan di HP ini':'数据仅保存在本手机','Hubungkan ke server agar data sama di semua perangkat':'连接服务器，使所有设备数据一致','Cara lain':'其他方式','Beranda':'首页','Selamat pagi':'早上好','Selamat siang':'中午好','Selamat sore':'下午好','Selamat malam':'晚上好','Ringkasan tanggal ini':'当日概况','karyawan hadir':'名员工出勤','OFF / libur':'OFF / 休息','Cuti / izin':'休假 / 请假','Statistik keseluruhan':'整体统计','Statistik pribadi':'个人统计','sampai hari ini':'截至今天','Tingkat kehadiran':'出勤率','Rata-rata hadir / hari':'日均出勤','Jam lembur reguler':'常白班加班小时','Masuk hari libur':'假日上班','Hari sakit (S)':'病假天数 (S)','Hari tanpa ket. (TK)':'缺勤天数 (TK)','Jumlah hadir per hari':'每日出勤人数','Hari kerja':'工作日','Minggu / hari libur':'星期日 / 假日','Unduh Excel periode ini':'下载本周期 Excel','Detail':'详情','Profil':'资料','Kehadiran':'考勤','Masuk libur':'假日上班','Hari tersisa':'剩余天数','libur':'假日','belum terjadi':'尚未发生','hadir':'出勤','rencana':'计划','Total periode ini':'本周期合计','Tanggal 21–20':'21日–20日','Bulan kalender':'自然月','Periode ini':'本周期','Satu bulan kalender':'一个自然月','Tersimpan di folder Download':'已保存到下载文件夹','Gagal menyimpan file':'保存文件失败','Perbarui APK untuk menyimpan file Excel':'请更新 APK 以保存 Excel 文件','Belum ada karyawan':'暂无员工','OFF / libur':'OFF / 休息','Sakit / TK':'病假 / 缺勤','Sakit (S)':'病假 (S)','Tanpa keterangan (TK)':'无故缺勤 (TK)','Tanda tidak hadir':'缺勤标记','Ditandai sakit (S)':'已标记病假 (S)','Ditandai tanpa keterangan (TK)':'已标记无故缺勤 (TK)','Tanda dihapus':'标记已删除','Tidak ada yang sakit atau tanpa keterangan':'没有病假或无故缺勤','Tandai lewat menu kehadiran tiap karyawan: ketuk nama, lalu pilih S atau TK.':'点击员工姓名，选择 S 或 TK 进行标记。','Reguler masuk hari Minggu / libur':'常白班星期日 / 假日上班','Sakit':'病假','Tanpa keterangan':'无故缺勤','Jam lembur reguler':'常白班加班小时','Jam lembur':'加班小时','Jam lembur lain':'其他加班小时','HL / libur':'假日上班','Kode otomatis hari ini':'今日自动代码','Kode HL (hari Minggu / libur)':'代码 HL（星期日 / 假日）','Libur / OFF':'休息 / OFF','Reguler · libur':'常白班 · 休息','Kode':'代码','bila dipilih masuk':'被选为上班时','Judul bagian reguler':'常白班分段标题','Judul bagian reguler 中文':'常白班中文分段标题','Total bulan ini':'本月合计','Per kode':'按代码','Karyawan reguler':'常白班员工','Hari kerja':'工作日','Sakelar menandai hari kerja. Pada hari kerja, karyawan reguler otomatis hadir dengan kode di atas (angka = jam lembur, mis. Senin–Kamis dan Sabtu 1, Jumat 3). Pada hari Minggu dan hari libur, hanya yang dipilih masuk yang hadir, dengan kode HL.':'开关表示工作日。工作日常白班员工自动出勤，使用上方代码（数字 = 加班小时，例如周一至周四和周六 1、周五 3）。星期日和假日只有被选为上班的员工出勤，代码为 HL。','Kode karyawan reguler terisi otomatis: Senin–Kamis dan Sabtu 1 jam lembur, Jumat 3, Minggu dan hari libur HL bila dipilih masuk. Karyawan shift yang masuk di hari libur tetap memakai kode 4 / 4HM. Ketuk sel untuk mengubah atau menandai S / TK.':'常白班代码自动填写：周一至周四和周六加班 1 小时，周五 3 小时，星期日和假日被选为上班时为 HL。倒班员工假日上班仍使用 4 / 4HM。点击格子可修改或标记 S / TK。','Hitungan dalam hari, kecuali jam lembur. Jam lembur hanya untuk karyawan reguler, dijumlahkan dari kodenya (Senin–Kamis dan Sabtu 1, Jumat 3). Hari HL karyawan reguler dan hari libur yang tetap masuk (karyawan shift tetap 4 / 4HM) dihitung di kolom "HL / libur". "Kosong" berarti karyawan shift belum diberi jadwal pada hari itu.':'除加班小时外均按天计算。加班小时仅适用于常白班员工，按代码相加（周一至周四和周六 1，周五 3）。常白班 HL 及假日上班（倒班员工仍为 4 / 4HM）计入"假日上班"列。"未排"表示该倒班员工当天尚未排班。','Pilih yang masuk':'选择上班人员','Pilih karyawan yang masuk':'选择上班的员工','Hari libur':'假日','Hari Minggu':'星期日','Libur mingguan':'每周休息日','Belum ada karyawan yang dipilih masuk':'尚未选择上班人员','karyawan masuk':'名员工上班','Sisanya OFF':'其余设为 OFF','Sedang cuti':'请假中','Cari karyawan':'搜索员工','Pilih semua':'全选','Masuk':'上班','Libur':'休息','Masuk libur':'假日上班','Jadikan hari libur':'设为假日','Ubah hari libur':'编辑假日','Tambah hari libur':'添加假日','Buka kehadiran':'打开考勤','Nama hari libur':'假日名称','Nama 中文 (opsional)':'中文名称（可选）','mis. Libur perusahaan':'例如 公司假日','Cuti bersama':'集体休假','Tanggal':'日期','Tanggal ini sudah jadi hari libur':'该日期已是假日','Isi tanggal dan nama dulu':'请先填写日期和名称','Hari libur disimpan':'假日已保存','Hapus hari libur ini? Pilihan karyawan yang masuk pada tanggal itu tetap tersimpan.':'删除此假日？当天已选择的上班人员会保留。','Tambah libur nasional':'添加法定假日','Dari SKB 3 Menteri':'依据三部长联合决定','Libur nasional & cuti bersama dari SKB 3 Menteri':'三部长联合决定的法定假日与集体休假','Termasuk cuti bersama':'包括集体休假','Tahun':'年份','sudah ada':'已存在','sudah lewat':'已过去','Semua tanggal sudah ada':'所有日期都已存在','Tanggal libur keagamaan bisa bergeser sesuai keputusan Menteri Agama. Ubah tanggalnya bila perlu.':'宗教假日日期可能按宗教部决定调整，如有需要请修改日期。','Belum ada hari libur. Tambahkan libur nasional atau libur perusahaan.':'暂无假日。可添加法定假日或公司假日。','Sembunyikan yang sudah lewat':'隐藏已过去的','Pada hari Minggu, libur mingguan, dan hari libur, karyawan reguler otomatis libur kecuali dipilih masuk (kode HL). Karyawan shift tetap mengikuti jadwal dengan kode 4 / 4HM. Ketuk tanggal di Jadwal untuk memilih yang masuk.':'在星期日、每周休息日和假日，常白班员工默认休息，除非被选为上班（代码 HL）；倒班员工仍按排班表使用 4 / 4HM。在排班页点击日期即可选择上班人员。','Minggu / hari libur · ketuk tanggal untuk memilih yang masuk':'星期日 / 假日 · 点击日期选择上班人员','Tambah':'添加','Kehadiran':'考勤','Lainnya':'更多','Profil karyawan':'员工资料','Cuti & izin':'请假','Statistik':'统计','Pengaturan':'设置','Shift hari ini':'今日班次','Kirim laporan':'发送报告','Perlu perhatian':'需要关注','Tulis':'撰写','Kirim':'发送','Kirim ke WA':'发送到 WA','Kirim WA':'发送 WA','Kirim daftar hadir':'发送出勤名单','Jadwal shift':'排班表','Area kerja':'工作区域','Format pesan':'消息格式','Gaya':'样式','Lengkap':'完整','Judul':'标题','Judul bagian':'分段标题','Judul 中文':'中文标题','Judul bagian 中文':'中文分段标题','Pratinjau':'预览','Salin ketiga pesan':'复制全部三条消息','Salin kemarin':'复制昨天','Tambah area':'添加区域','Kode':'代码','Kode area':'区域代码','Hapus area':'删除区域','Jumlah porsi':'份数','Saran':'建议','Jumlah nasi siang ikut dalam pesan Daftar hadir.':'午餐份数会包含在出勤名单消息中。','Belum ada isi untuk pesan ini.':'此消息暂无内容。',
@@ -1237,7 +1329,13 @@ const chev=()=>ic('chevR').replace('class="i"','class="i chev"');
 const lic=(icon,color)=>`<span class="lic" style="background:${color}">${ic(icon)}</span>`;
 const emptyV=(icon,title,text,btn='')=>`<div class="empty">${ic(icon)}<b>${title}</b><p>${text}</p>${btn}</div>`;
 const card=(title,body,extra='')=>`<section class="card">${title?`<div class="ch"><h2>${title}</h2>${extra}</div>`:''}${body}</section>`;
-const dsw=(sub)=>`<div class="dsw"><button class="ib" data-act="prev" aria-label="Sebelumnya">${ic('chevL')}</button><div class="dl" data-nt><b>${esc(dMain(UI.date))}</b><small>${esc(sub!=null?sub:dSub(UI.date))||'&nbsp;'}${sub==null&&holOn(UI.date)?` · <span class="hr">${esc(LANG==='zh'?(holOn(UI.date).zh||holOn(UI.date).nama):holOn(UI.date).nama)}</span>`:''}</small><input type="date" id="dpick" value="${UI.date}" aria-label="Pilih tanggal"></div><button class="ib" data-act="next" aria-label="Berikutnya">${ic('chevR')}</button>${UI.date!==ymd(new Date())?'<button class="tdy" data-act="today">Hari ini</button>':''}</div>`;
+const WKD={id:['Min','Sen','Sel','Rab','Kam','Jum','Sab'],zh:['日','一','二','三','四','五','六']};
+function wkStrip(){
+  const d=parse(UI.date),k=(d.getDay()+6)%7,mon=addDays(UI.date,-k),t=ymd(new Date());
+  return `<div class="wks" data-w="${mon}" data-k="${k}" data-nt><span class="pill" style="--k:${k}"></span>${[0,1,2,3,4,5,6].map(i=>{const x=addDays(mon,i),dt=parse(x),wd=dt.getDay();
+    return `<button class="${x===UI.date?'on':''}${x===t?' td':''}${liburDay(x)?' lb':''}" data-act="wkd" data-d="${x}" aria-label="${esc(dMain(x))}"><span class="wd">${LANG==='zh'?WKD.zh[wd]:WKD.id[wd]}</span><span class="wn">${dt.getDate()}</span></button>`}).join('')}</div>`;
+}
+const dsw=(sub)=>`<div class="dsw wkon"><button class="ib" data-act="prev" aria-label="Sebelumnya">${ic('chevL')}</button><div class="dl" data-nt><b>${esc(dMain(UI.date))}</b><small>${esc(sub!=null?sub:dSub(UI.date))||'&nbsp;'}${sub==null&&holOn(UI.date)?` · <span class="hr">${esc(LANG==='zh'?(holOn(UI.date).zh||holOn(UI.date).nama):holOn(UI.date).nama)}</span>`:''}</small><input type="date" id="dpick" value="${UI.date}" aria-label="Pilih tanggal"></div><button class="ib" data-act="next" aria-label="Berikutnya">${ic('chevR')}</button>${UI.date!==ymd(new Date())?'<button class="tdy" data-act="today">Hari ini</button>':''}</div>${wkStrip()}`;
 const msw=()=>`<div class="dsw"><button class="ib" data-act="mprev" aria-label="Sebelumnya">${ic('chevL')}</button><div class="dl" data-nt><b>${esc(mLabel2(UI.month))}</b><small>${esc(T(S.emps.filter(e=>e.aktif&&!isReg(e)).length+' karyawan shift'))}</small><input type="month" id="mpick" value="${UI.month}" aria-label="Pilih bulan"></div><button class="ib" data-act="mnext" aria-label="Berikutnya">${ic('chevR')}</button>${UI.month!==ymd(new Date()).slice(0,7)?'<button class="tdy" data-act="mtoday">Bulan ini</button>':''}</div>`;
 const psw=P=>`<div class="dsw"><button class="ib" data-act="pprev" aria-label="Sebelumnya">${ic('chevL')}</button><div class="dl" data-nt><b>${esc(periodName(P))}</b><small>${esc(periodLbl(P))}${LANG==='dual'?' · '+esc(periodZh(P)):''}</small></div><button class="ib" data-act="pnext" aria-label="Berikutnya">${ic('chevR')}</button>${UI.pmonth!==periodNow()?'<button class="tdy" data-act="pnow">Periode ini</button>':''}</div><div class="toolbar"><div class="seg" style="width:240px"><button class="${PST()>1?'on':''}" data-act="setper" data-v="21">Tanggal 21–20</button><button class="${PST()===1?'on':''}" data-act="setper" data-v="1">Bulan kalender</button></div></div>`;
 const gchips=(list)=>{const G=S.groups||[];if(!G.length)return '';return `<div class="fchips">${[['all','Semua'],...G.map(g=>[g.id,g.nama]),...(list.some(e=>!e.group)?[['none','Tanpa regu']]:[])].map(([v,l])=>`<button class="fc ${(UI.gf||'all')===v?'on':''}" data-act="gf" data-v="${v}">${v!=='all'&&v!=='none'?`<span class="dot" style="background:${grp(v).warna}"></span><span data-nt>${esc(l)}</span>`:l}</button>`).join('')}</div>`};
@@ -1614,7 +1712,7 @@ function todayCard(date,A){
   const lg=seg.map(([k,n,v])=>`<button class="lgi ${n?'':'z'}" data-act="hgo" data-v="${v}"><span class="dot" style="background:${CAT[k]}${k==='belum'?';box-shadow:inset 0 0 0 1px #C9CDD4':''}"></span><span class="lgl">${esc(CATL[k])}</span><b data-nt>${n}</b></button>`).join('');
   const isT=date===ymd(new Date());
   return `<section class="card hero"><div class="hhd"><span class="hgr">${isT?greet()+'<span data-nt>, '+esc(S.nama||'Admin')+'</span>':'Ringkasan tanggal ini'}</span></div>
-   <div class="hnum"><b data-nt>${A.total}</b><span data-nt>/ ${act}</span><em>${esc(T('karyawan hadir'))}</em><span class="hpct" data-nt>${pct(A.total,act)}%</span></div>
+   <div class="hnum"><b data-nt data-count="${A.total}">${A.total}</b><span data-nt>/ ${act}</span><em>${esc(T('karyawan hadir'))}</em><span class="hpct" data-nt data-count="${pct(A.total,act)}" data-suf="%">${pct(A.total,act)}%</span></div>
    <div class="pbar">${bar||'<i style="flex:1;background:var(--div)"></i>'}</div>
    <div class="lgrid">${lg}</div></section>`;
 }
@@ -1865,7 +1963,7 @@ function pcts(vals){const t=vals.reduce((a,b)=>a+b,0);if(!t)return vals.map(()=>
 function donut(segs,center,sub){
   const R=62,SW=20,C=2*Math.PI*R,tot=segs.reduce((a,x)=>a+x.v,0),gap=segs.filter(x=>x.v).length>1?2:0;let acc=0;
   const arcs=tot?segs.filter(x=>x.v).map(x=>{const len=x.v/tot*C,d=Math.max(0,len-gap),o=acc;acc+=len;return `<circle r="${R}" cx="80" cy="80" fill="none" stroke="${x.col}" stroke-width="${SW}" stroke-dasharray="${d} ${C-d}" stroke-dashoffset="${-o}" transform="rotate(-90 80 80)" data-tip="${esc(x.tip)}"/>`}).join(''):`<circle r="${R}" cx="80" cy="80" fill="none" stroke="#EFF0F1" stroke-width="${SW}"/>`;
-  return `<svg class="dn" viewBox="0 0 160 160" role="img" aria-label="${esc(sub)}">${arcs}<text x="80" y="80" text-anchor="middle" class="dc">${esc(center)}</text><text x="80" y="100" text-anchor="middle" class="ds">${esc(sub)}</text></svg>`;
+  return `<svg class="dn" viewBox="0 0 160 160" role="img" aria-label="${esc(sub)}">${arcs}<text x="80" y="80" text-anchor="middle" class="dc"${/^\d+%$/.test(String(center))?` data-count="${parseInt(center)}" data-suf="%"`:''}>${esc(center)}</text><text x="80" y="100" text-anchor="middle" class="ds">${esc(sub)}</text></svg>`;
 }
 function vStat(){
   if(!S.emps.length)return `<div class="wrap">${card('',needEmp())}</div>`;
@@ -2077,7 +2175,9 @@ const PARENT={pesan:'more',cuti:'more',stat:'more',atur:'more',server:'more',emp
 const bilIn=t=>{const r=TR(t);return LANG==='zh'?esc(r):LANG==='dual'&&r!==t?esc(t)+'<span class="zt">'+esc(r)+'</span>':esc(t)};
 function buildChrome(){
   const t=UI.tab,top=PARENT[t]||t;
-  $('#tabs').innerHTML=TOP.map(k=>`<button class="${top===k?'on':''}" data-act="tab" data-v="${k}">${ic(META[k][1])}<span data-nt>${bil(META[k][0])}</span></button>`).join('');
+  const tb=$('#tabs'),sig=LANG+'|'+TOP.join();
+  if(tb.dataset.sig!==sig){tb.innerHTML=TOP.map(k=>`<button class="${top===k?'on':''}" data-act="tab" data-v="${k}"><span class="ti">${ic(META[k][1])}</span><span data-nt>${bil(META[k][0])}</span></button>`).join('');tb.dataset.sig=sig}
+  else tb.querySelectorAll('button').forEach(b=>{const on=b.dataset.v===top;if(on&&!b.classList.contains('on')&&!RM){b.classList.add('just');setTimeout(()=>b.classList.remove('just'),450)}b.classList.toggle('on',on)});
   const side=['today','jadwal','hadir','emp','sep','pesan','cuti','stat','sep','atur','server'];
   $('#side').innerHTML=`<div class="sidelogo"><img src="${LOGO}" alt="PT Sulawesi Recycling Technology"><span data-nt>Fei Fei Sibuk</span></div>`+side.map(k=>k==='sep'?'<div class="navsep"></div>':`<button class="nav ${t===k||(k==='emp'&&t==='empd')?'on':''}" data-act="tab" data-v="${k}">${ic(META[k][1])}<span data-nt>${bilIn(META[k][0]).replace('class="zt"','class="zt"')}</span></button>`).join('');
   const sub=!!PARENT[t];
@@ -2090,7 +2190,7 @@ function renderSheet(){
   sh.innerHTML=({lmasuk:lmSheet,day:daySheet,hol:holSheet,holset:holsetSheet,cell:cellSheet,reg:regSheet,leave:leaveSheet,pat:patSheet,apply:applySheet,grp:grpSheet,add:addSheet,lang:langSheet,cnpick:cnPickSheet,cnw:cnwSheet})[UI.sheet]();
   trDom(sh);sh.classList.add('on');bg.classList.add('on');sh.scrollTop=st;
 }
-function openSheet(k){UI.sheet=k;renderSheet();$('#sheet').scrollTop=0}
+function openSheet(k){const was=!!UI.sheet;UI.sheet=k;renderSheet();$('#sheet').scrollTop=0;if(!was)hap(6)}
 function closeSheet(){UI.sheet=null;renderSheet()}
 function refreshOutput(){if(UI.tab==='pesan'||UI.tab==='hadir'){const keep=document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.bind:null;if(keep)return softQuick();render()}}
 function refreshMasuk(){}
@@ -2115,11 +2215,58 @@ function render(){
   buildQuick();warn();
   ['#bar','#view','#tabs','#side','#warn'].forEach(x=>trDom($(x)));
   if(UI.sheet)renderSheet();
+  motion();
   window.scrollTo(0,y0);
   if(t==='jadwal'&&UI.scrollToday){UI.scrollToday=false;const g=$('#gridw'),th=g&&g.querySelector('th.td');if(g&&th)g.scrollLeft=Math.max(0,th.offsetLeft-170)}
   if(UI.focus){const el=document.querySelector(`.chipin[data-t="${UI.focus}"]`);if(el)el.focus();UI.focus=null}
 }
 function go(tab){UI.tab=tab;UI.qr=false;if(tab==='jadwal')UI.scrollToday=true;render();window.scrollTo(0,0)}
+
+/* ---------- gerak & sentuhan ---------- */
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+const HAP=(()=>{const m=navigator.userAgent.match(/AturKaryawanAPK\/1\.0\.(\d+)/);if(m)return +m[1]>=10;return /Android/i.test(navigator.userAgent)&&'vibrate' in navigator})();
+function hap(ms){if(HAP&&!RM)try{navigator.vibrate(ms||8)}catch(e){}}
+const HAPACT=new Set(['tab','prev','next','today','wkd','mprev','mnext','pt','ht','pv','tf','gf','cntog','gemem','gaya','setper','pprev','pnext']);
+const DAYV=new Set(['today','hadir','pesan']),VCLS=['v-rise','v-push','v-pop','v-next','v-prev','v-fade'];
+const MO={tab:null,date:null,month:null,pm:null,sub:null,wk:null,k:null,tm:0};
+function motion(){
+  const v=$('#view'),t=UI.tab,sub=[UI.ht,UI.pt,UI.tf,UI.gf,UI.pv,UI.hf].join('|');
+  let cls='';
+  if(MO.tab!==t)cls=MO.tab==null?'v-rise':PARENT[t]===MO.tab?'v-push':PARENT[MO.tab]===t?'v-pop':'v-rise';
+  else if(MO.date!==UI.date&&DAYV.has(t))cls=UI.date>MO.date?'v-next':'v-prev';
+  else if(MO.month!==UI.month&&t==='jadwal')cls=UI.month>MO.month?'v-next':'v-prev';
+  else if(MO.pm!==UI.pmonth&&t==='stat')cls=(UI.pmonth||'')>(MO.pm||'')?'v-next':'v-prev';
+  else if(MO.sub!==sub)cls='v-fade';
+  const wk=v.querySelector('.wks'),wkKey=wk?wk.dataset.w:null,k=wk?+wk.dataset.k:null,sameWeek=wk&&wkKey===MO.wk&&MO.tab===t;
+  if(sameWeek&&!RM&&MO.k!=null&&MO.k!==k){const p=wk.querySelector('.pill');p.style.transition='none';p.style.setProperty('--k',MO.k);void p.offsetWidth;p.style.transition='';p.style.setProperty('--k',k)}
+  MO.tab=t;MO.date=UI.date;MO.month=UI.month;MO.pm=UI.pmonth;MO.sub=sub;MO.wk=wkKey;MO.k=k;
+  if(!cls||RM)return;
+  const kids=[...v.children];
+  if(cls==='v-next'||cls==='v-prev'){kids.forEach(el=>{if(el.classList.contains('dsw')){const l=el.querySelector('.dl');if(l)l.classList.add('an-d')}else if(el.classList.contains('wks')){if(!sameWeek)el.classList.add('an-d')}else if(!el.classList.contains('utabs')&&!el.classList.contains('fchips')&&!el.classList.contains('toolbar'))el.classList.add('an-d')})}
+  else if(cls==='v-fade'){kids.forEach(el=>{if(el.classList.contains('wrap')||el.classList.contains('gridw')||el.id==='gridw')el.classList.add('an-d')})}
+  else{let i=0;kids.forEach(el=>{if(el.classList.contains('wrap'))[...el.children].forEach(c=>{c.classList.add('an');c.style.setProperty('--i',Math.min(i++,9))});else{el.classList.add('an');el.style.setProperty('--i',Math.min(i++,9))}})}
+  v.classList.remove(...VCLS);void v.offsetWidth;v.classList.add(cls);
+  clearTimeout(MO.tm);MO.tm=setTimeout(()=>v.classList.remove(cls),1000);
+  if(cls!=='v-pop'&&cls!=='v-fade')countUp(v);
+}
+function countUp(root){root.querySelectorAll('[data-count]').forEach(el=>{const n=+el.dataset.count,suf=el.dataset.suf||'';if(!(n>1))return;const t0=performance.now(),dur=650;
+  const step=now=>{const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);el.textContent=Math.round(n*e)+suf;if(p<1&&el.isConnected)requestAnimationFrame(step)};el.textContent='0'+suf;requestAnimationFrame(step)})}
+(function(){
+  /* bayangan bilah atas saat digulir */
+  let sc=false;addEventListener('scroll',()=>{const s=scrollY>4;if(s!==sc){sc=s;$('#bar').classList.toggle('sc',s)}},{passive:true});
+  /* getar ringan (APK 1.0.10+) */
+  document.addEventListener('click',ev=>{const el=ev.target.closest&&ev.target.closest('[data-act]');if(el&&HAPACT.has(el.dataset.act))hap(8)},true);
+  /* geser strip minggu */
+  let wx=null,wy=0;
+  document.addEventListener('touchstart',e=>{const w=e.target.closest&&e.target.closest('.wks');if(!w){wx=null;return}wx=e.touches[0].clientX;wy=e.touches[0].clientY},{passive:true});
+  document.addEventListener('touchend',e=>{if(wx==null)return;const t=e.changedTouches[0],dx=t.clientX-wx,dy=t.clientY-wy;wx=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.4){UI.date=addDays(UI.date,dx<0?7:-7);hap(10);render()}},{passive:true});
+  /* tarik lembar ke bawah untuk menutup */
+  const sh=$('#sheet');let y0=null,dy=0,t0=0;
+  sh.addEventListener('touchstart',e=>{if(innerWidth>=900||!e.target.closest('.grab,.shh')||e.target.closest('button,input,select,textarea')||sh.scrollTop>0){y0=null;return}y0=e.touches[0].clientY;dy=0;t0=Date.now();sh.style.transition='none'},{passive:true});
+  sh.addEventListener('touchmove',e=>{if(y0==null)return;dy=Math.max(0,e.touches[0].clientY-y0);sh.style.transform=dy?`translateY(${dy}px)`:''},{passive:true});
+  const end=()=>{if(y0==null)return;const vel=dy/Math.max(1,Date.now()-t0);y0=null;sh.style.transition='';sh.style.transform='';if(dy>90||(vel>.6&&dy>24))closeSheet()};
+  sh.addEventListener('touchend',end,{passive:true});sh.addEventListener('touchcancel',end,{passive:true});
+})();
 
 /* ---------- aksi ---------- */
 function applyPattern(){
@@ -2145,6 +2292,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='tf'){UI.tf=ds.v;render()}
   else if(a==='gf'){UI.gf=ds.v;render()}
   else if(a==='sheetclose'){closeSheet()}
+  else if(a==='wkd'){UI.date=ds.d;render()}
   else if(a==='prev'||a==='next'){UI.date=addDays(UI.date,a==='next'?1:-1);render()}
   else if(a==='today'){UI.date=ymd(new Date());render()}
   else if(a==='mprev'||a==='mnext'){UI.month=addMonths(UI.month,a==='mnext'?1:-1);render()}
